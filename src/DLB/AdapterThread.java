@@ -52,7 +52,7 @@ public class AdapterThread extends Thread {
         long t2 = System.currentTimeMillis();
         System.out.println("First Job = " + MainThread.jobQueue.getFirst());
         System.out.println("Time taken = " + (t2 -t1));
-        Message msg = new Message(MessageType.JOBTRANSFER, MainThread.numJobs / 2);
+        Message msg = new Message(MessageType.JOBTRANSFER, 5);
         MainThread.transferManagerThread.addMessage(msg);
     }
 
@@ -65,6 +65,7 @@ public class AdapterThread extends Thread {
                 adapterWork();
             } catch (InterruptedException ie) {
                 ie.printStackTrace();
+                MainThread.stop();
             }
         }
     }

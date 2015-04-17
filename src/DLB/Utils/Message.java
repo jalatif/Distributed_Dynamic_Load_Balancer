@@ -16,6 +16,14 @@ public class Message implements Serializable {
         this.data = data;
     }
 
+    @Override
+    public String toString() {
+        return "Message{" +
+                "msgType=" + msgType.name() +
+                ", data=" + data.toString() +
+                '}';
+    }
+
     public MessageType getMsgType() {
         return msgType;
     }

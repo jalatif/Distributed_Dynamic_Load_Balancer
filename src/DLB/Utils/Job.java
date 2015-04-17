@@ -55,12 +55,14 @@ public class Job <T> implements Serializable {
     @Override
     public String toString() {
         StringBuilder stringBuilder = new StringBuilder();
+        stringBuilder.append(" | (");
         stringBuilder.append("FI = " + startIndex).append(", ");
         stringBuilder.append("EI = " + endIndex).append(", ");
         stringBuilder.append("Items = ");
         for (int i = 0; i < data.length; i++) {
             stringBuilder.append(data[i].toString()).append(" ");
         }
+        stringBuilder.append(") | ");
         return stringBuilder.toString();
     }
 }

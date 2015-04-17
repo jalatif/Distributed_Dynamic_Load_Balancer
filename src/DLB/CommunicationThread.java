@@ -1,15 +1,13 @@
 package DLB;
 
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 
 /**
  * Created by manshu on 4/16/15.
  */
 public class CommunicationThread extends Thread {
-    private DataOutputStream dout;
-    private DataInputStream din;
+    private ObjectOutputStream dout;
+    private ObjectInputStream din;
 
 
     public CommunicationThread() throws IOException {
@@ -18,24 +16,36 @@ public class CommunicationThread extends Thread {
     }
 
     public void setUpStreams() throws IOException {
-        dout = new DataOutputStream(MainThread.otherSocket.getOutputStream());
-        din  = new DataInputStream(MainThread.mySocket.getInputStream());
+        dout = new ObjectOutputStream(MainThread.otherSocket.getOutputStream());
+        din  = new ObjectInputStream(MainThread.mySocket.getInputStream());
     }
 
-    public void sendMessage(String message) throws IOException {
+    public void sendMessage(Object message) throws IOException {
         if (dout == null) return;
-        dout.writeUTF(message);
+        //dout.writeUTF(message);
+        dout.writeObject(message);
     }
 
-    public String receiveMessage() throws IOException {
+    public Object receiveMessage() throws IOException, ClassNotFoundException {
         if (din == null) return "";
-        String message = din.readUTF();
-        System.out.println("Message = " + message);
+        Object message = din.readObject();
+        System.out.println("Message = " + message.toString());
         return message;
     }
 
+
     @Override
     public void run() {
-        super.run();
+        while (!MainThread.STOP_SIGNAL) {
+            try {
+                receiveMessage();
+            } catch (IOException e) {
+                e.printStackTrace();
+                System.out.println("Cannot continue w/o connection");
+                MainThread.stop();
+            } catch (ClassNotFoundException e) {
+                e.printStackTrace();
+            }
+        }
     }
 }

@@ -1,9 +1,13 @@
 package DLB;
 
+import DLB.Utils.Job;
 import DLB.Utils.Message;
 import DLB.Utils.MessageType;
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -28,10 +32,15 @@ public class TransferManagerThread extends Thread {
         if (incomingMsg.getMsgType() != MessageType.JOBTRANSFER) return;
         Integer queueToSend = (Integer) incomingMsg.getData();
         StringBuilder stringBuilder = new StringBuilder();
+        List<Job<Double>> jobsToSend = new LinkedList<Job<Double>>();
         for (int i = 0; i < queueToSend; i++) {
-            stringBuilder.append(MainThread.jobQueue.pollFirst()).append("|");
+            //stringBuilder.append(MainThread.jobQueue.pollFirst()).append("|");
+            jobsToSend.add(MainThread.jobQueue.pollFirst());
         }
-        MainThread.communicationThread.sendMessage(stringBuilder.toString());
+        System.out.println("Sending message to other node");
+        Message message = new Message(MessageType.JOBTRANSFER, jobsToSend);
+        MainThread.communicationThread.sendMessage(message);
+        System.out.println("Message sent");
     }
 
     @Override
@@ -41,8 +50,10 @@ public class TransferManagerThread extends Thread {
                 transferWork();
             } catch (InterruptedException e) {
                 e.printStackTrace();
+                MainThread.stop();
             } catch (IOException e) {
                 e.printStackTrace();
+                MainThread.stop();
             }
         }
     }

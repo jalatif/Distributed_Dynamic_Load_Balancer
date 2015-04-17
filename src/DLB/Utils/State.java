@@ -11,6 +11,27 @@ public class State implements Serializable {
     private double cpu_usage;
     private double bw_usage;
 
+    public State(int queue_length, double ...usages) {
+        this.queue_length = queue_length;
+        if (usages.length >= 1)
+            cpu_usage = usages[0];
+        else
+            cpu_usage = -1;
+        if (usages.length >= 2)
+            bw_usage = usages[1];
+        else
+            bw_usage = -1;
+    }
+
+    @Override
+    public String toString() {
+        return "State{" +
+                "queue_length=" + queue_length +
+                ", cpu_usage=" + cpu_usage +
+                ", bw_usage=" + bw_usage +
+                '}';
+    }
+
     public int getQueueLength() {
         return queue_length;
     }

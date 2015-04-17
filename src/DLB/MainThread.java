@@ -22,7 +22,7 @@ public class MainThread {
     protected volatile static boolean STOP_SIGNAL;
 
     protected static int numJobs = 512;
-    protected static int numElements = 1024 * 1024 * 32;
+    protected static int numElements = 1024;//1024 * 1024 * 32;
     protected static double initVal = 1.111111, addVal = 1.111111;
     protected static double[] vectorA;
 
@@ -55,8 +55,14 @@ public class MainThread {
         adapterThread.start();
     }
 
-    public void stop() {
+    public static void stop() {
         STOP_SIGNAL = true;
+        try {
+            Thread.sleep(2000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.exit(0);
     }
 
     public void connect(String ip, int port, String ip2, int port2) throws IOException {
@@ -83,7 +89,7 @@ public class MainThread {
         communicationThread.start();
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
 
         isLocal = false;
 
@@ -92,15 +98,14 @@ public class MainThread {
         String ip2 = "localhost"; int port2 = 5678;
 
         if (!isLocal) {
-            int temp = port;
-            port = port2;
-            port2 = temp;
+            ip2 = "jalatif2.ddns.net";
+            mainThread.connect(ip2, port2, ip, port);
+        } else {
+            ip2 = "jalatif2.ddns.net";
+            mainThread.connect(ip, port, ip2, port2);
         }
-
-        mainThread.connect(ip, port, ip2, port2);
-
-        communicationThread.sendMessage("I am at port " + port);
-        System.out.println(communicationThread.receiveMessage());
+        communicationThread.sendMessage("Got connection from " + port);
+        //System.out.println(communicationThread.receiveMessage());
 
         mainThread.start();
 
