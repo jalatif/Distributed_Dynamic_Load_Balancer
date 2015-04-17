@@ -2,7 +2,6 @@ package DLB;
 
 import DLB.Utils.Job;
 
-import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.*;
 import java.util.Arrays;
@@ -50,7 +49,7 @@ public class MainThread {
         vectorA = new double[numElements];
         Arrays.fill(vectorA, initVal);
 //        hwMonitorThread.start();
-//        transferManagerThread.start();
+        transferManagerThread.start();
 //        stateManagerThread.start();
 //        workerThread.start();
         adapterThread.start();
