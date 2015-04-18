@@ -62,6 +62,7 @@ public class Job implements Serializable {
         for (int i = 0; i < data.length; i++) {
             stringBuilder.append(data[i]).append(" ");
         }
+        //stringBuilder.append(data[0] + ".....");
         stringBuilder.append(") | ");
         return stringBuilder.toString();
     }

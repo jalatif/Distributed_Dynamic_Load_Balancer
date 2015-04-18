@@ -8,4 +8,6 @@ public enum MessageType {
     JOBTRANSFER,
     JOBRESULT,
     SM,
+    FinishACK,
+    OkACK,
 }

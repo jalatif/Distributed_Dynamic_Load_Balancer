@@ -14,7 +14,7 @@ import java.util.concurrent.LinkedBlockingDeque;
  * Created by manshu on 4/16/15.
  */
 public class AdapterThread extends Thread {
-    private static volatile double throttlingValue = 0.5;
+    private static volatile double throttlingValue;
 
     private WorkerThread[] workerThreads;
 
@@ -22,10 +22,14 @@ public class AdapterThread extends Thread {
 
     public AdapterThread() {
         messages = new LinkedBlockingDeque<Message>();
+        throttlingValue = MainThread.throttlingValue;
     }
 
-    public static void setThrottlingValue(double tValue) {
+    public void setThrottlingValue(double tValue) {
         throttlingValue = tValue;
+        for (int i = 0; i < workerThreads.length; i++) {
+            workerThreads[i].changeThrottleValue(throttlingValue);
+        }
     }
 
     private void adapterWork() throws InterruptedException {
@@ -62,7 +66,7 @@ public class AdapterThread extends Thread {
     private void startWorkers() {
         workerThreads = new WorkerThread[MainThread.numWorkerThreads];
         for (int i = 0; i < workerThreads.length; i++) {
-            workerThreads[i] = new WorkerThread();
+            workerThreads[i] = new WorkerThread(i, throttlingValue);
             workerThreads[i].start();
         }
     }
@@ -72,6 +76,7 @@ public class AdapterThread extends Thread {
         if (MainThread.isLocal)
             bootstrapJobs();
         startWorkers();
+
         while (!MainThread.STOP_SIGNAL) {
             try {
                 adapterWork();

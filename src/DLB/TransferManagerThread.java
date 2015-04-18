@@ -62,9 +62,9 @@ public class TransferManagerThread extends Thread {
         }
     }
 
-    public static void addJobs(List<Job> jobs) {
+    public static synchronized void addJobs(List<Job> jobs) {
         System.out.println("There are some incoming Jobs to my node "); // ca
-        System.out.println("Current jobs are " + MainThread.jobQueue.size());
+        System.out.println("Current jobs are " + MainThread.jobQueue.size() + " and " + jobs.size() + " came");
         for (Job job : jobs) {
             // add to job queue
             MainThread.jobQueue.addFirst(job);
@@ -72,11 +72,11 @@ public class TransferManagerThread extends Thread {
             // print jobs info ================================================
             System.out.println("Job Data ----->");
             System.out.println(job.getStartIndex() + " " + job.getEndIndex());
-            Double[] data = job.getData();
-            for (Double element : data) {
-                System.out.print(element + " ");
-            }
-            System.out.println();
+//                Double[] data = job.getData();
+//                for (Double element : data) {
+//                    System.out.print(element + " ");
+//                }
+//                System.out.println();
             //=================================================================
         }
         System.out.println("Now jobs are " + MainThread.jobQueue.size());
@@ -88,10 +88,12 @@ public class TransferManagerThread extends Thread {
             try {
                 transferWork();
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
+                System.out.println("Cannot continue w/o connection");
                 MainThread.stop();
             } catch (IOException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
+                System.out.println("Cannot continue w/o connection");
                 MainThread.stop();
             }
         }
