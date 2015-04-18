@@ -5,8 +5,7 @@ package DLB.Utils;
  */
 public enum MessageType {
     HW,
-    WORKER,
     JOBTRANSFER,
+    JOBRESULT,
     SM,
-    USER
 }

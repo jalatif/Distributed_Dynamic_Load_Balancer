@@ -14,7 +14,10 @@ import java.util.concurrent.LinkedBlockingDeque;
  * Created by manshu on 4/16/15.
  */
 public class AdapterThread extends Thread {
-    private static double throttlingValue = 0.5;
+    private static volatile double throttlingValue = 0.5;
+
+    private WorkerThread[] workerThreads;
+
     private BlockingQueue<Message> messages;
 
     public AdapterThread() {
@@ -46,20 +49,29 @@ public class AdapterThread extends Thread {
                 //list.add(MainThread.vectorA[j]);
                 arr[j - i] = MainThread.vectorA[j];
             }
-            Job<Double> job = new Job<Double>(i, i + jobItems, arr);
+            Job job = new Job(i, i + jobItems, arr);
             MainThread.jobQueue.add(job);
         }
         long t2 = System.currentTimeMillis();
         System.out.println("First Job = " + MainThread.jobQueue.getFirst());
-        System.out.println("Time taken = " + (t2 -t1));
-        Message msg = new Message(MessageType.JOBTRANSFER, 5);
+        System.out.println("Time taken = " + (t2 - t1));
+        Message msg = new Message(MessageType.JOBTRANSFER, MainThread.numJobs / 2);
         MainThread.transferManagerThread.addMessage(msg);
+    }
+
+    private void startWorkers() {
+        workerThreads = new WorkerThread[MainThread.numWorkerThreads];
+        for (int i = 0; i < workerThreads.length; i++) {
+            workerThreads[i] = new WorkerThread();
+            workerThreads[i].start();
+        }
     }
 
     @Override
     public void run() {
         if (MainThread.isLocal)
             bootstrapJobs();
+        startWorkers();
         while (!MainThread.STOP_SIGNAL) {
             try {
                 adapterWork();

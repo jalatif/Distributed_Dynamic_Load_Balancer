@@ -1,6 +1,10 @@
 package DLB;
 
+import DLB.Utils.Job;
+import DLB.Utils.Message;
+
 import java.io.*;
+import java.util.List;
 
 /**
  * Created by manshu on 4/16/15.
@@ -28,9 +32,38 @@ public class CommunicationThread extends Thread {
 
     public Object receiveMessage() throws IOException, ClassNotFoundException {
         if (din == null) return "";
-        Object message = din.readObject();
-        System.out.println("Message = " + message.toString());
-        return message;
+        Object incomingMsg = din.readObject();
+
+        System.out.println("Message = " + incomingMsg.toString());
+        System.out.println(incomingMsg.getClass());
+
+        if (incomingMsg instanceof Message) {
+            try {
+                Message msg = (Message) incomingMsg;
+                switch (msg.getMsgType()) {
+                    case JOBTRANSFER:
+                        List<Job> list = (List<Job>) msg.getData();
+                        TransferManagerThread.addJobs(list);
+                        break;
+                    case JOBRESULT:
+                        System.out.println("Got result from remote node");
+                        Job resultJob = (Job) msg.getData();
+                        MainThread.addToResult(resultJob);
+                        break;
+                    default:
+                        System.out.println("Unknown message");
+                }
+                //Class<?> theClass = Class.forName("DLB.Utils.Message");
+                //(Message) theClass.cast(message);
+
+            } catch (ClassCastException e) {
+                e.printStackTrace();
+                //System.out.println(e.getMessage());
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return incomingMsg;
     }
 
 

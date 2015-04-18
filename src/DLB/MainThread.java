@@ -21,12 +21,17 @@ public class MainThread {
 
     protected volatile static boolean STOP_SIGNAL;
 
-    protected static int numJobs = 512;
+    protected static int numJobs = 16;
+    protected static int numWorkerThreads = 5;
+
+    protected static int utilizationFactor = 10000;
+
     protected static int numElements = 1024;//1024 * 1024 * 32;
     protected static double initVal = 1.111111, addVal = 1.111111;
     protected static double[] vectorA;
+    protected static double[] vectorB;
 
-    protected static BlockingDeque<Job<Double>> jobQueue;
+    protected static BlockingDeque<Job> jobQueue;
 
     protected static ServerSocket serverSocket;
     protected static Socket otherSocket;
@@ -45,14 +50,26 @@ public class MainThread {
 
     public void start() throws InterruptedException {
         STOP_SIGNAL = false;
-        jobQueue = new LinkedBlockingDeque<Job<Double>>();
-        vectorA = new double[numElements];
-        Arrays.fill(vectorA, initVal);
+        jobQueue = new LinkedBlockingDeque<Job>();
+        if (isLocal) {
+            vectorA = new double[numElements];
+            Arrays.fill(vectorA, initVal);
+
+            vectorB = new double[numElements];
+        }
+
 //        hwMonitorThread.start();
         transferManagerThread.start();
 //        stateManagerThread.start();
 //        workerThread.start();
         adapterThread.start();
+    }
+
+    protected static void addToResult(Job job) {
+        Double[] data = job.getData();
+        for (int i = job.getStartIndex(); i < job.getEndIndex(); i++) {
+            vectorB[i] = data[i - job.getStartIndex()];
+        }
     }
 
     public static void stop() {
@@ -98,10 +115,10 @@ public class MainThread {
         String ip2 = "localhost"; int port2 = 5678;
 
         if (!isLocal) {
-            ip2 = "jalatif2.ddns.net";
+            //ip2 = "jalatif2.ddns.net";
             mainThread.connect(ip2, port2, ip, port);
         } else {
-            ip2 = "jalatif2.ddns.net";
+            //ip2 = "jalatif2.ddns.net";
             mainThread.connect(ip, port, ip2, port2);
         }
         communicationThread.sendMessage("Got connection from " + port);
