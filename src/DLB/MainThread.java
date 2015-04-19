@@ -22,13 +22,13 @@ public class MainThread {
 
     protected volatile static boolean STOP_SIGNAL;
 
-    protected static int numJobs = 512;
-    protected static int numWorkerThreads = 5;
+    protected static int numJobs = 1024;
+    protected static int numWorkerThreads = 1;
 
     protected static int utilizationFactor = 100;
     protected static int numElementsPrint = 10;
-    protected static double throttlingValue = 0.01;
-    protected static int collectionRate = 2000;
+    protected static double throttlingValue = 0.003;
+    protected static int collectionRate = 100; // in ms
 
     protected static int numElements = 1024 * 1024 * 32;//1024 * 1024 * 32;
     protected static double initVal = 1.111111, addVal = 1.111111;
@@ -41,7 +41,7 @@ public class MainThread {
     protected static Socket otherSocket;
     protected static Socket mySocket;
 
-    protected static boolean isLocal = !true;
+    protected static boolean isLocal = true;
     private static int elementsDone;
 
     public MainThread() throws IOException {
@@ -64,7 +64,6 @@ public class MainThread {
         }
         adapterThread.start();
         transferManagerThread.start();
-        hwMonitorThread.start();
 //        stateManagerThread.start();
     }
 
@@ -95,6 +94,18 @@ public class MainThread {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+        /////////////////////Test Output//////////////////////////
+        if (isLocal) {
+            System.out.println("Wait testing the output");
+            for (int i = 0; i < vectorB.length; i++)
+                if (vectorB[i] != (vectorA[i] + addVal)) {
+                    System.out.println("Resultant Output incorrect at " + i + " index with value = " + vectorB[i]);
+                    System.exit(1);
+                }
+            System.out.println("Resultant Output is all correct");
+        }
+        ///////////////////////////////////////////////
+
         System.exit(0);
     }
 

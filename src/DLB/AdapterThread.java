@@ -57,25 +57,26 @@ public class AdapterThread extends Thread {
             MainThread.jobQueue.add(job);
         }
         long t2 = System.currentTimeMillis();
-        System.out.println("First Job = " + MainThread.jobQueue.getFirst());
         System.out.println("Time taken = " + (t2 - t1));
         Message msg = new Message(MessageType.JOBTRANSFER, MainThread.numJobs / 2);
         MainThread.transferManagerThread.addMessage(msg);
     }
 
-    private void startWorkers() {
+    private void startWorkersAndMonitors() {
         workerThreads = new WorkerThread[MainThread.numWorkerThreads];
         for (int i = 0; i < workerThreads.length; i++) {
             workerThreads[i] = new WorkerThread(i, throttlingValue);
             workerThreads[i].start();
         }
+        MainThread.hwMonitorThread.start();
     }
 
     @Override
     public void run() {
         if (MainThread.isLocal)
             bootstrapJobs();
-        startWorkers();
+
+        startWorkersAndMonitors();
 
         while (!MainThread.STOP_SIGNAL) {
             try {
@@ -86,4 +87,5 @@ public class AdapterThread extends Thread {
             }
         }
     }
+
 }

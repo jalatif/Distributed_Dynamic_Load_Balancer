@@ -6,6 +6,9 @@ package DLB.Utils;
 public enum MessageType {
     HW,
     JOBTRANSFER,
+    JOBSTART,
+    JOBMID,
+    JOBEND,
     JOBRESULT,
     SM,
     FinishACK,

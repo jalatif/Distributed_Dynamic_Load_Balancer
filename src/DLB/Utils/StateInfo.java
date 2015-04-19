@@ -7,11 +7,13 @@ import java.io.Serializable;
  */
 public class StateInfo implements Serializable {
     private static final long serialVersionUID = -1885711311464708208L;
+    private int machineId;
     private int queueLength;
     private double cpuUsage;
     private double bwUsage;
 
-    public StateInfo(int queue_length, double ...usages) {
+    public StateInfo(int machineId, int queue_length, double ...usages) {
+        this.machineId = machineId;
         this.queueLength = queue_length;
         if (usages.length >= 1)
             cpuUsage = usages[0];
@@ -26,10 +28,19 @@ public class StateInfo implements Serializable {
     @Override
     public String toString() {
         return "StateInfo{" +
-                "queueLength=" + queueLength +
+                "machineId=" + machineId +
+                ", queueLength=" + queueLength +
                 ", cpuUsage=" + cpuUsage +
                 ", bwUsage=" + bwUsage +
                 '}';
+    }
+
+    public int getMachineId() {
+        return machineId;
+    }
+
+    public void setMachineId(int machineId) {
+        this.machineId = machineId;
     }
 
     public int getQueueLength() {
