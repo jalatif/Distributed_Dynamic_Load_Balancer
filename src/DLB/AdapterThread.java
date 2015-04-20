@@ -3,8 +3,10 @@ package DLB;
 import DLB.Utils.Job;
 import DLB.Utils.Message;
 import DLB.Utils.MessageType;
+import DLB.Utils.StateInfo;
 
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.concurrent.BlockingQueue;
@@ -19,10 +21,14 @@ public class AdapterThread extends Thread {
     private WorkerThread[] workerThreads;
 
     private BlockingQueue<Message> messages;
+    private StateInfo prev_sLocal, prev_sRemote;
+    private Date lastStateTime;
 
     public AdapterThread() {
         messages = new LinkedBlockingDeque<Message>();
         throttlingValue = MainThread.throttlingValue;
+        prev_sLocal = null;
+        prev_sRemote = null;
     }
 
     public void setThrottlingValue(double tValue) {
@@ -37,6 +43,50 @@ public class AdapterThread extends Thread {
         System.out.println("Adapter Thread Working with Message " + incomingMsg);
         // sleep switch worker
         // queue check - call function accordingly
+
+        if (incomingMsg.getMsgType() != MessageType.HW) return;
+
+        StateInfo sRemote = (StateInfo) incomingMsg.getData();
+        StateInfo sLocal = MainThread.hwMonitorThread.getCurrentState();
+
+        if (MainThread.jobsInQueue) return;
+
+        if ((sLocal.getQueueLength() - sRemote.getQueueLength()) > MainThread.queueDifferenceThreshold) {
+            int jobsToSend = (sLocal.getQueueLength() - sRemote.getQueueLength()) / 2;
+            Message msg = new Message(MainThread.machineId, MessageType.JOBTRANSFER, jobsToSend);
+            System.out.println("Matching expected time to finish by sending " + jobsToSend + " number of jobs");
+            MainThread.transferManagerThread.addMessage(msg);
+        }
+//
+//        if (lastStateTime != null && lastStateTime.compareTo(sLocal.getTimestamp()) < 1) return;
+//        if (lastStateTime != null && lastStateTime.compareTo(sRemote.getTimestamp()) < 1) return;
+
+//        if (prev_sRemote != null && prev_sLocal != null) {
+//            int delta_queue1 = prev_sLocal.getQueueLength() - sLocal.getQueueLength();
+//            int delta_queue2 = prev_sRemote.getQueueLength() - sRemote.getQueueLength();
+//            int delta_time1 = (int) (sLocal.getTimestamp().getTime() - prev_sLocal.getTimestamp().getTime());
+//            int delta_time2 = (int) (sRemote.getTimestamp().getTime() - prev_sRemote.getTimestamp().getTime());
+//            int ql1 = sLocal.getQueueLength(), ql2 = sRemote.getQueueLength();
+//
+//            if (delta_queue1 <= 0) return;
+//            if (delta_queue2 <= 0) return;
+//
+//            double ttf1 = (delta_time1 * ql1) / (1.0 * delta_queue1);
+//            double ttf2 = (delta_time2 * ql2) / (1.0 * delta_queue2);
+//
+//            System.out.println("ttf1 = " + ttf1 + ", ttf2 = " + ttf2);
+//            if (ttf1 > ttf2) {
+//                int c1 = delta_time2 * delta_queue1;
+//                int c2 = delta_time1 * delta_queue2;
+//                int jobsToSend = (int) ((c2 * ql2 - c1 * ql1) / (1.0 * (c1 + c2)));
+//                System.out.println("Matching expected time to finish by sending " + jobsToSend + " number of jobs");
+//                Message msg = new Message(MainThread.machineId, MessageType.BULKJOBTRANSFER, jobsToSend);
+//                MainThread.transferManagerThread.addMessage(msg);
+//                lastStateTime = new Date();
+//            }
+//        }
+        prev_sLocal = sLocal;
+        prev_sRemote = sRemote;
     }
 
     protected synchronized void addMessage(Message msg) {
@@ -58,8 +108,9 @@ public class AdapterThread extends Thread {
         }
         long t2 = System.currentTimeMillis();
         System.out.println("Time taken = " + (t2 - t1));
-        Message msg = new Message(MessageType.JOBTRANSFER, MainThread.numJobs / 2);
+        Message msg = new Message(MainThread.machineId, MessageType.JOBTRANSFER, MainThread.numJobs / 2);
         MainThread.transferManagerThread.addMessage(msg);
+        MainThread.jobsInQueue = true;
     }
 
     private void startWorkersAndMonitors() {
@@ -75,6 +126,25 @@ public class AdapterThread extends Thread {
     public void run() {
         if (MainThread.isLocal)
             bootstrapJobs();
+        if (MainThread.isLocal) {
+//            while (MainThread.jobsInQueue) {
+//                try {
+//                    sleep(100);
+//                } catch (InterruptedException ie) {
+//                    ie.printStackTrace();
+//                    break;
+//                }
+//            }
+        } else {
+            while (MainThread.jobQueue.isEmpty()) {
+                try {
+                    sleep(100);
+                } catch (InterruptedException ie) {
+                    ie.printStackTrace();
+                    break;
+                }
+            }
+        }
 
         startWorkersAndMonitors();
 

@@ -21,7 +21,6 @@ public class WorkerThread extends Thread {
     private ScheduledExecutorService scheduler;
     private ScheduledFuture<?> workHandle, sleepHandle;
     private Job currentJob;
-    private final Lock lock = new ReentrantLock();
 
     public WorkerThread(int index, double tValue) {
         this.index = index;
@@ -118,7 +117,7 @@ public class WorkerThread extends Thread {
             MainThread.addToResult(resultJob);
         } else {
             System.out.println("Worker thread " + index + " sending message");
-            Message msg = new Message(MessageType.JOBRESULT, resultJob);
+            Message msg = new Message(MainThread.machineId, MessageType.JOBRESULT, resultJob);
             MainThread.transferManagerThread.addMessage(msg);
         }
         currentJob = null;

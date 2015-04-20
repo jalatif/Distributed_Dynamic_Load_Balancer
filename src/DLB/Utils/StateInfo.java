@@ -1,19 +1,21 @@
 package DLB.Utils;
 
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * Created by manshu on 4/16/15.
  */
 public class StateInfo implements Serializable {
     private static final long serialVersionUID = -1885711311464708208L;
-    private int machineId;
+
+    private Date timestamp;
     private int queueLength;
     private double cpuUsage;
     private double bwUsage;
 
-    public StateInfo(int machineId, int queue_length, double ...usages) {
-        this.machineId = machineId;
+    public StateInfo(int queue_length, double ...usages) {
+        this.timestamp = new Date();
         this.queueLength = queue_length;
         if (usages.length >= 1)
             cpuUsage = usages[0];
@@ -28,19 +30,19 @@ public class StateInfo implements Serializable {
     @Override
     public String toString() {
         return "StateInfo{" +
-                "machineId=" + machineId +
-                ", queueLength=" + queueLength +
+                "queueLength=" + queueLength +
                 ", cpuUsage=" + cpuUsage +
                 ", bwUsage=" + bwUsage +
+                ", timestamp=" + timestamp +
                 '}';
     }
 
-    public int getMachineId() {
-        return machineId;
+    public Date getTimestamp() {
+        return timestamp;
     }
 
-    public void setMachineId(int machineId) {
-        this.machineId = machineId;
+    public void setTimestamp(Date timestamp) {
+        this.timestamp = timestamp;
     }
 
     public int getQueueLength() {

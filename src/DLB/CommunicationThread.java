@@ -49,19 +49,46 @@ public class CommunicationThread extends Thread {
             try {
                 Message msg = (Message) incomingMsg;
                 switch (msg.getMsgType()) {
-                    case JOBTRANSFER:
-                        List<Job> list = (List<Job>) msg.getData();
-                        TransferManagerThread.addJobs(list);
+                    case BULKJOBTRANSFER:
+                        List<Job> jobs = (List<Job>) msg.getData();
+                        TransferManagerThread.addJobs(jobs);
                         break;
+
+                    case JOBHEADER:
+                        MainThread.jobsInComing = true;
+                        System.out.println("Number of jobs that are coming starting are " + (int) msg.getData());
+                        System.out.println("Current jobs are " + MainThread.jobQueue.size());
+                        break;
+
+                    case JOBTRANSFER:
+                        Job job = (Job) msg.getData();
+                        TransferManagerThread.addJob(job);
+                        break;
+
+                    case JOBFOOTER:
+                        MainThread.jobsInComing = false;
+                        System.out.println("Jobs have been completely transferred");
+                        System.out.println("Current jobs are " + MainThread.jobQueue.size());
+                        msg = new Message(MainThread.machineId, MessageType.JOBTRANSFERACK, msg.getData());
+                        MainThread.transferManagerThread.addMessage(msg); //sendMessage(msg);
+                        break;
+
+                    case JOBTRANSFERACK:
+                        MainThread.jobsInQueue = false;
+                        MainThread.jobsInComing = false;
+                        System.out.println("Jobs successfully transferred to other node");
+                        break;
+
                     case JOBRESULT:
                         System.out.println("Got result from remote node");
                         Job resultJob = (Job) msg.getData();
                         MainThread.addToResult(resultJob);
                         break;
+
                     case FinishACK:
                         System.out.println("Got finished ack");
-                        Message okMsg = new Message(MessageType.OkACK, 0);
-                        sendMessage(okMsg);
+                        Message okMsg = new Message(MainThread.machineId, MessageType.OkACK, 0);
+                        MainThread.transferManagerThread.addMessage(msg); //sendMessage(okMsg);
                         System.out.println("OkAck message sent");
                         MainThread.stop();
                         break;

@@ -5,10 +5,11 @@ package DLB.Utils;
  */
 public enum MessageType {
     HW,
+    BULKJOBTRANSFER,
     JOBTRANSFER,
-    JOBSTART,
-    JOBMID,
-    JOBEND,
+    JOBHEADER,
+    JOBFOOTER,
+    JOBTRANSFERACK,
     JOBRESULT,
     SM,
     FinishACK,

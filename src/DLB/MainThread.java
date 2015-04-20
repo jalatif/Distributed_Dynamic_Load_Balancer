@@ -9,6 +9,8 @@ import java.net.*;
 import java.util.Arrays;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by manshu on 4/16/15.
@@ -27,8 +29,11 @@ public class MainThread {
 
     protected static int utilizationFactor = 100;
     protected static int numElementsPrint = 10;
-    protected static double throttlingValue = 0.003;
-    protected static int collectionRate = 100; // in ms
+    protected static double throttlingValue = 0.8;
+    protected static int collectionRate = 500; // in ms
+
+    protected static int queueDifferenceThreshold = 20;
+    protected static int cpuThresholdLimit = 50;
 
     protected static int numElements = 1024 * 1024 * 32;//1024 * 1024 * 32;
     protected static double initVal = 1.111111, addVal = 1.111111;
@@ -41,7 +46,13 @@ public class MainThread {
     protected static Socket otherSocket;
     protected static Socket mySocket;
 
-    protected static boolean isLocal = true;
+    protected static boolean isLocal = !true;
+    protected static int machineId = 0;
+
+    protected static volatile Lock lock = new ReentrantLock(true);
+
+    protected static volatile boolean jobsInQueue = false;
+    protected static volatile boolean jobsInComing = false;
     private static int elementsDone;
 
     public MainThread() throws IOException {
@@ -54,6 +65,9 @@ public class MainThread {
 
     public void start() throws InterruptedException {
         STOP_SIGNAL = false;
+
+        if (!isLocal) machineId = 1;
+
         jobQueue = new LinkedBlockingDeque<Job>();
         if (isLocal) {
             vectorA = new double[numElements];
@@ -64,7 +78,7 @@ public class MainThread {
         }
         adapterThread.start();
         transferManagerThread.start();
-//        stateManagerThread.start();
+        stateManagerThread.start();
     }
 
     protected static synchronized void addToResult(Job job) {
@@ -78,7 +92,7 @@ public class MainThread {
             for (int i = 0; i < Math.min(numElements, numElementsPrint); i++)
                 System.out.print(vectorB[i] + " ");
             System.out.println("......");
-            Message msg = new Message(MessageType.FinishACK, 0);
+            Message msg = new Message(machineId, MessageType.FinishACK, 0);
             try {
                 communicationThread.sendMessage(msg);
             } catch (IOException ie) {
@@ -94,18 +108,19 @@ public class MainThread {
         } catch (InterruptedException e) {
             e.printStackTrace();
         }
+
         /////////////////////Test Output//////////////////////////
         if (isLocal) {
             System.out.println("Wait testing the output");
-            for (int i = 0; i < vectorB.length; i++)
+            for (int i = 0; i < vectorB.length; i++) {
                 if (vectorB[i] != (vectorA[i] + addVal)) {
                     System.out.println("Resultant Output incorrect at " + i + " index with value = " + vectorB[i]);
                     System.exit(1);
                 }
+            }
             System.out.println("Resultant Output is all correct");
         }
-        ///////////////////////////////////////////////
-
+        ///////////////////////////////////////////////////////
         System.exit(0);
     }
 

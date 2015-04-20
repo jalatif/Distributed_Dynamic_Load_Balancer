@@ -23,8 +23,8 @@ public class HWMonitorThread extends Thread {
     public HWMonitorThread() {
         sigar = new Sigar();
         cpu = null;
-
         pid = sigar.getPid(); // this one gives me the same process ID that I see in visualVM
+        System.out.println("PID of the process is " + pid);
     }
 
     private double getCpuUsage() {
@@ -49,17 +49,17 @@ public class HWMonitorThread extends Thread {
         return nw_usage;
     }
 
+    protected StateInfo getCurrentState() {
+        return new StateInfo(MainThread.jobQueue.size(), getCpuUsage(), getNwUsage());
+    }
+
     private void doMonitoring() throws IOException {
-        int queue_length = MainThread.jobQueue.size();
-        if (queue_length == 0) return;
-
-        int machineId = 0;
-        if (!MainThread.isLocal) machineId = 1;
-
-        StateInfo state = new StateInfo(machineId, queue_length, getCpuUsage(), getNwUsage());
-        Message msg = new Message(MessageType.HW, state);
-        MainThread.adapterThread.addMessage(msg);
-        MainThread.communicationThread.sendMessage(msg);
+        //if (MainThread.jobsInQueue || MainThread.jobsInComing) return;
+        //int queue_length = MainThread.jobQueue.size();
+        StateInfo state = getCurrentState();//new StateInfo(queue_length, getCpuUsage(), getNwUsage());
+        Message msg = new Message(MainThread.machineId, MessageType.HW, state);
+        //MainThread.adapterThread.addMessage(msg);
+        MainThread.stateManagerThread.addMessage(msg);//MainThread.communicationThread.sendMessage(msg);
     }
 
     @Override

@@ -8,10 +8,12 @@ import java.io.Serializable;
 public class Message implements Serializable {
     private static final long serialVersionUID = 1256368627620549766L;
 
+    private int machineId;
     private MessageType msgType;
     private Object data;
 
-    public Message(MessageType msgType, Object data) {
+    public Message(int machineId, MessageType msgType, Object data) {
+        this.machineId = machineId;
         this.msgType = msgType;
         this.data = data;
     }
@@ -19,9 +21,18 @@ public class Message implements Serializable {
     @Override
     public String toString() {
         return "Message{" +
-                "msgType=" + msgType.name() +
-                ", data=" + data.toString() +
+                "machineId=" + machineId +
+                ", msgType=" + msgType +
+                ", data=" + data +
                 '}';
+    }
+
+    public int getMachineId() {
+        return machineId;
+    }
+
+    public void setMachineId(int machineId) {
+        this.machineId = machineId;
     }
 
     public MessageType getMsgType() {
