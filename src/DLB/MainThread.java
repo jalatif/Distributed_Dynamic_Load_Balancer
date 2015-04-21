@@ -58,8 +58,10 @@ public class MainThread {
 
     private static int elementsDone;
 
-    protected static double throttlingValue = 0.3;
-    protected static boolean isLocal = !true;
+    protected static double throttlingValue = 0.4;
+    protected static boolean isLocal = true;
+    protected static String ip = "jalatif2.ddns.net"; //"localhost";
+    protected static int port = 2211;
 
     public MainThread() throws IOException, SigarException {
         transferManagerThread = new TransferManagerThread();
@@ -160,10 +162,14 @@ public class MainThread {
     }
 
     public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException, SigarException {
+        if (args.length >= 1 && args[0].equals("remote"))
+            isLocal = false;
+        if (args.length >= 2)
+            ip = args[1];
+        if (args.length >= 3)
+            port = Integer.parseInt(args[2]);
 
         MainThread mainThread = new MainThread();
-        String ip = "localhost"; int port = 1234;
-        //ip = "jalatif2.ddns.net";
         mainThread.connect(ip, port);
 
         communicationThread.sendMessage("Got connection from " + port);

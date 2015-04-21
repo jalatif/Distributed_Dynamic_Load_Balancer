@@ -40,7 +40,6 @@ public class AdapterThread extends Thread {
 
     private void adapterWork() throws InterruptedException {
         Message incomingMsg = messages.take();
-        System.out.println("Adapter Thread Working with Message " + incomingMsg);
         // sleep switch worker
         // queue check - call function accordingly
 
@@ -48,6 +47,9 @@ public class AdapterThread extends Thread {
 
         StateInfo sRemote = (StateInfo) incomingMsg.getData();
         StateInfo sLocal = MainThread.hwMonitorThread.getCurrentState();
+
+        System.out.println("Adapter State Remote " + sRemote);
+        System.out.println("Adapter State Local " + sLocal);
 
         synchronized (MainThread.jobInQueueLock) {
             if (MainThread.jobsInQueue) return;
