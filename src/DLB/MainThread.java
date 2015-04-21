@@ -165,9 +165,12 @@ public class MainThread {
         if (args.length >= 1 && args[0].equals("remote"))
             isLocal = false;
         if (args.length >= 2)
-            ip = args[1];
+            throttlingValue = Double.parseDouble(args[1]);
         if (args.length >= 3)
-            port = Integer.parseInt(args[2]);
+            ip = args[2];
+        if (args.length >= 4)
+            port = Integer.parseInt(args[3]);
+
 
         MainThread mainThread = new MainThread();
         mainThread.connect(ip, port);

@@ -114,7 +114,7 @@ public class AdapterThread extends Thread {
         }
         long t2 = System.currentTimeMillis();
         System.out.println("Time taken = " + (t2 - t1));
-        Message msg = new Message(MainThread.machineId, MessageType.BULKJOBTRANSFER, MainThread.numJobs / 2);
+        Message msg = new Message(MainThread.machineId, MessageType.JOBTRANSFER, MainThread.numJobs / 2);
         MainThread.transferManagerThread.addMessage(msg);
         synchronized (MainThread.jobInQueueLock) {
             MainThread.jobsInQueue = true;
