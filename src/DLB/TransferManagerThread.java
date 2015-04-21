@@ -63,7 +63,6 @@ public class TransferManagerThread extends Thread {
         System.out.println("Sending " + queueToSend + " jobs to other node ");
         //StringBuilder stringBuilder = new StringBuilder();
 
-        System.out.println("Sending message to other node");
 
         Message message = new Message(MainThread.machineId, MessageType.JOBHEADER, queueToSend);
         MainThread.communicationThread.sendMessage(message);
@@ -100,11 +99,15 @@ public class TransferManagerThread extends Thread {
         Message incomingMsg = messages.take();
         switch (incomingMsg.getMsgType()) {
             case BULKJOBTRANSFER:
-                MainThread.jobsInQueue = true;
+                synchronized (MainThread.jobInQueueLock) {
+                    MainThread.jobsInQueue = true;
+                }
                 sendRequiredJobs(incomingMsg);
                 break;
             case JOBTRANSFER:
-                MainThread.jobsInQueue = true;
+                synchronized (MainThread.jobInQueueLock) {
+                    MainThread.jobsInQueue = true;
+                }
                 sendRequiredJob(incomingMsg);
                 break;
             case JOBRESULT:
@@ -117,8 +120,8 @@ public class TransferManagerThread extends Thread {
     }
 
     public static void addJobs(List<Job> jobs) throws IOException {
-        System.out.println("There are some incoming Jobs to my node "); // ca
-        System.out.println("Current jobs are " + MainThread.jobQueue.size());
+        //System.out.println("There are some incoming Jobs to my node "); // ca
+        //System.out.println("Current jobs are " + MainThread.jobQueue.size());
         for (Job job : jobs) {
             // add to job queue
             MainThread.jobQueue.addFirst(job);
@@ -133,7 +136,9 @@ public class TransferManagerThread extends Thread {
 //            System.out.println();
             //=================================================================
         }
-        MainThread.jobsInComing = false;
+        synchronized (MainThread.jobInComingLock) {
+            MainThread.jobsInComing = false;
+        }
         System.out.println("Now jobs are " + MainThread.jobQueue.size());
         Message message = new Message(MainThread.machineId, MessageType.JOBTRANSFERACK, 0);
         MainThread.communicationThread.sendMessage(message);

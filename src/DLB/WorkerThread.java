@@ -53,12 +53,12 @@ public class WorkerThread extends Thread {
         threadSuspended = false;
         notify();
 
-        //System.out.println("Worker thread " + index + " woke");
+        System.out.println("Worker thread " + index + " woke");
         setUpSleepTimer();
     }
 
     private synchronized void sleepWorker() {
-        //System.out.println("Worker thread " + index + " sleep");
+        System.out.println("Worker thread " + index + " sleep");
         threadSuspended = true;
         setUpWorkTimer();
     }

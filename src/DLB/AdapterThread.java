@@ -49,7 +49,9 @@ public class AdapterThread extends Thread {
         StateInfo sRemote = (StateInfo) incomingMsg.getData();
         StateInfo sLocal = MainThread.hwMonitorThread.getCurrentState();
 
-        if (MainThread.jobsInQueue) return;
+        synchronized (MainThread.jobInQueueLock) {
+            if (MainThread.jobsInQueue) return;
+        }
 
         if ((sLocal.getQueueLength() - sRemote.getQueueLength()) > MainThread.queueDifferenceThreshold) {
             int jobsToSend = (sLocal.getQueueLength() - sRemote.getQueueLength()) / 2;
@@ -57,6 +59,8 @@ public class AdapterThread extends Thread {
             System.out.println("Matching expected time to finish by sending " + jobsToSend + " number of jobs");
             MainThread.transferManagerThread.addMessage(msg);
         }
+
+
 //
 //        if (lastStateTime != null && lastStateTime.compareTo(sLocal.getTimestamp()) < 1) return;
 //        if (lastStateTime != null && lastStateTime.compareTo(sRemote.getTimestamp()) < 1) return;
@@ -85,8 +89,8 @@ public class AdapterThread extends Thread {
 //                lastStateTime = new Date();
 //            }
 //        }
-        prev_sLocal = sLocal;
-        prev_sRemote = sRemote;
+//        prev_sLocal = sLocal;
+//        prev_sRemote = sRemote;
     }
 
     protected synchronized void addMessage(Message msg) {
@@ -108,9 +112,11 @@ public class AdapterThread extends Thread {
         }
         long t2 = System.currentTimeMillis();
         System.out.println("Time taken = " + (t2 - t1));
-        Message msg = new Message(MainThread.machineId, MessageType.JOBTRANSFER, MainThread.numJobs / 2);
+        Message msg = new Message(MainThread.machineId, MessageType.BULKJOBTRANSFER, MainThread.numJobs / 2);
         MainThread.transferManagerThread.addMessage(msg);
-        MainThread.jobsInQueue = true;
+        synchronized (MainThread.jobInQueueLock) {
+            MainThread.jobsInQueue = true;
+        }
     }
 
     private void startWorkersAndMonitors() {
@@ -127,14 +133,16 @@ public class AdapterThread extends Thread {
         if (MainThread.isLocal)
             bootstrapJobs();
         if (MainThread.isLocal) {
-//            while (MainThread.jobsInQueue) {
-//                try {
-//                    sleep(100);
-//                } catch (InterruptedException ie) {
-//                    ie.printStackTrace();
-//                    break;
-//                }
-//            }
+            synchronized (MainThread.jobInQueueLock) {
+                while (MainThread.jobsInQueue) {
+                    try {
+                        sleep(100);
+                    } catch (InterruptedException ie) {
+                        ie.printStackTrace();
+                        break;
+                    }
+                }
+            }
         } else {
             while (MainThread.jobQueue.isEmpty()) {
                 try {

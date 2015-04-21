@@ -3,6 +3,7 @@ package DLB;
 import DLB.Utils.Job;
 import DLB.Utils.Message;
 import DLB.Utils.MessageType;
+import org.hyperic.sigar.SigarException;
 
 import java.io.IOException;
 import java.net.*;
@@ -27,9 +28,8 @@ public class MainThread {
     protected static int numJobs = 1024;
     protected static int numWorkerThreads = 1;
 
-    protected static int utilizationFactor = 100;
+    protected static int utilizationFactor = 5000;
     protected static int numElementsPrint = 10;
-    protected static double throttlingValue = 0.8;
     protected static int collectionRate = 500; // in ms
 
     protected static int queueDifferenceThreshold = 20;
@@ -44,18 +44,24 @@ public class MainThread {
 
     protected static ServerSocket serverSocket;
     protected static Socket otherSocket;
-    protected static Socket mySocket;
+    protected volatile static Socket mySocket;
 
-    protected static boolean isLocal = !true;
+
     protected static int machineId = 0;
 
-    protected static volatile Lock lock = new ReentrantLock(true);
+    // locks for 2 volatile variables.
+    protected static volatile Lock jobInQueueLock = new ReentrantLock(true);
+    protected static volatile Lock jobInComingLock = new ReentrantLock(true);
 
     protected static volatile boolean jobsInQueue = false;
     protected static volatile boolean jobsInComing = false;
+
     private static int elementsDone;
 
-    public MainThread() throws IOException {
+    protected static double throttlingValue = 0.4;
+    protected static boolean isLocal = !true;
+
+    public MainThread() throws IOException, SigarException {
         transferManagerThread = new TransferManagerThread();
         stateManagerThread = new StateManagerThread();
         hwMonitorThread = new HWMonitorThread();
@@ -109,6 +115,11 @@ public class MainThread {
             e.printStackTrace();
         }
 
+        try {
+            mySocket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         /////////////////////Test Output//////////////////////////
         if (isLocal) {
             System.out.println("Wait testing the output");
@@ -124,58 +135,40 @@ public class MainThread {
         System.exit(0);
     }
 
-    public void connect(String ip, int port, String ip2, int port2) throws IOException {
-        if (!isLocal)
-            mySocket = new Socket(ip2, port2);
+    public void connect(String ip, int port) throws IOException {
+        if (!isLocal) {
+            mySocket = new Socket(ip, port);
+        } else {
 
-        InetAddress locIP = InetAddress.getByName(ip);
+            InetAddress locIP = InetAddress.getByName(ip);
 
-        System.out.println(Inet4Address.getLocalHost().getHostAddress());
+            System.out.println(Inet4Address.getLocalHost().getHostAddress());
 
-        serverSocket = new ServerSocket(port, 0, locIP);
+            serverSocket = new ServerSocket(port, 0, locIP);
 
-        System.out.println("Listening on " + serverSocket);
+            System.out.println("Listening on " + serverSocket);
 
-        otherSocket = serverSocket.accept();
+            mySocket = serverSocket.accept();
 
-        System.out.println("Connection from " + otherSocket);
-
-        if (isLocal)
-            mySocket = new Socket(ip2, port2);
+            System.out.println("Connection from " + mySocket);
+        }
 
         communicationThread.setUpStreams();
 
         communicationThread.start();
+
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException {
-//
-//        isLocal = true;
-//
-//        isLocal = !isLocal;
+    public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException, SigarException {
 
         MainThread mainThread = new MainThread();
         String ip = "localhost"; int port = 1234;
-        String ip2 = "localhost"; int port2 = 5678;
+        //ip = "jalatif2.ddns.net";
+        mainThread.connect(ip, port);
 
-        if (!isLocal) {
-            //ip2 = "jalatif2.ddns.net";
-            mainThread.connect(ip2, port2, ip, port);
-        } else {
-            //ip2 = "jalatif2.ddns.net";
-            mainThread.connect(ip, port, ip2, port2);
-        }
         communicationThread.sendMessage("Got connection from " + port);
-        //System.out.println(communicationThread.receiveMessage());
 
         mainThread.start();
-//
-//        try {
-//            Thread.sleep(50000);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-//
-//        mainThread.stop();
+
     }
 }

@@ -21,7 +21,7 @@ public class CommunicationThread extends Thread {
     }
 
     public void setUpStreams() throws IOException {
-        dout = new ObjectOutputStream(MainThread.otherSocket.getOutputStream());
+        dout = new ObjectOutputStream(MainThread.mySocket.getOutputStream());
         din  = new ObjectInputStream(MainThread.mySocket.getInputStream());
     }
 
@@ -43,7 +43,7 @@ public class CommunicationThread extends Thread {
         }
         String inString = incomingMsg.toString();
         System.out.println("Message = " + inString.substring(0, Math.min(inString.length(), 80)));
-        System.out.println(incomingMsg.getClass());
+        //System.out.println(incomingMsg.getClass());
 
         if (incomingMsg instanceof Message) {
             try {
@@ -55,7 +55,9 @@ public class CommunicationThread extends Thread {
                         break;
 
                     case JOBHEADER:
-                        MainThread.jobsInComing = true;
+                        synchronized (MainThread.jobInComingLock) {
+                            MainThread.jobsInComing = true;
+                        }
                         System.out.println("Number of jobs that are coming starting are " + (int) msg.getData());
                         System.out.println("Current jobs are " + MainThread.jobQueue.size());
                         break;
@@ -66,7 +68,9 @@ public class CommunicationThread extends Thread {
                         break;
 
                     case JOBFOOTER:
-                        MainThread.jobsInComing = false;
+                        synchronized (MainThread.jobInComingLock) {
+                            MainThread.jobsInComing = false;
+                        }
                         System.out.println("Jobs have been completely transferred");
                         System.out.println("Current jobs are " + MainThread.jobQueue.size());
                         msg = new Message(MainThread.machineId, MessageType.JOBTRANSFERACK, msg.getData());
@@ -74,8 +78,12 @@ public class CommunicationThread extends Thread {
                         break;
 
                     case JOBTRANSFERACK:
-                        MainThread.jobsInQueue = false;
-                        MainThread.jobsInComing = false;
+                        synchronized (MainThread.jobInQueueLock) {
+                            MainThread.jobsInQueue = false;
+                        }
+                        synchronized (MainThread.jobInComingLock) {
+                            MainThread.jobsInComing = false;
+                        }
                         System.out.println("Jobs successfully transferred to other node");
                         break;
 
@@ -131,6 +139,12 @@ public class CommunicationThread extends Thread {
                 System.out.println("Cannot continue w/o connection");
                 MainThread.stop();
             }
+        }
+        try {
+            dout.close();
+            din.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 }
