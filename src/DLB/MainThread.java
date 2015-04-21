@@ -59,8 +59,8 @@ public class MainThread {
     private static int elementsDone;
 
     protected static double throttlingValue = 0.4;
-    protected static boolean isLocal = true;
-    protected static String ip = "jalatif2.ddns.net"; //"localhost";
+    protected static boolean isLocal = !true;
+    protected static String ip = "172.17.116.149";//"jalatif2.ddns.net"; //"localhost";
     protected static int port = 2211;
 
     public MainThread() throws IOException, SigarException {

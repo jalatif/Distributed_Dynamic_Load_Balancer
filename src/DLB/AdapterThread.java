@@ -144,7 +144,7 @@ public class AdapterThread extends Thread {
                 }
             }
         } else {
-            while (MainThread.jobQueue.isEmpty()) {
+            while (MainThread.jobQueue.isEmpty() || MainThread.jobsInComing) {
                 try {
                     sleep(100);
                 } catch (InterruptedException ie) {
