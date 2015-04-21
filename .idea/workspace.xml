@@ -31,7 +31,7 @@
       <file leaf-file-name="MainThread.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/DLB/MainThread.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.87540716">
+            <state vertical-scroll-proportion="0.8338762">
               <caret line="60" column="49" selection-start-line="60" selection-start-column="49" selection-end-line="60" selection-end-column="49" />
               <folding>
                 <element signature="imports" expanded="true" />
@@ -64,7 +64,7 @@
         <entry file="file://$PROJECT_DIR$/src/DLB/AdapterThread.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="145" column="16" selection-start-line="145" selection-start-column="16" selection-end-line="145" selection-end-column="16" />
+              <caret line="143" column="16" selection-start-line="143" selection-start-column="16" selection-end-line="143" selection-end-column="16" />
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -189,10 +189,10 @@
         <option value="$PROJECT_DIR$/src/DLB/Utils/StateInfo.java" />
         <option value="$PROJECT_DIR$/src/DLB/Utils/MessageType.java" />
         <option value="$PROJECT_DIR$/src/DLB/WorkerThread.java" />
-        <option value="$PROJECT_DIR$/src/DLB/AdapterThread.java" />
         <option value="$PROJECT_DIR$/src/DLB/CommunicationThread.java" />
         <option value="$PROJECT_DIR$/src/DLB/TransferManagerThread.java" />
         <option value="$PROJECT_DIR$/src/DLB/HWMonitorThread.java" />
+        <option value="$PROJECT_DIR$/src/DLB/AdapterThread.java" />
         <option value="$PROJECT_DIR$/src/DLB/MainThread.java" />
       </list>
     </option>
@@ -767,12 +767,12 @@
       <workItem from="1429428202951" duration="20835000" />
       <workItem from="1429499917532" duration="1904000" />
       <workItem from="1429506131569" duration="16366000" />
-      <workItem from="1429566439405" duration="11137000" />
+      <workItem from="1429566439405" duration="11595000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="107650000" />
+    <option name="totallyTimeSpent" value="108108000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-2" width="3856" height="2110" extended-state="6" />
@@ -1146,16 +1146,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/hs_err_pid12284.log">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
-        </state>
-      </provider>
-      <provider editor-type-id="com.intellij.database.editor.CsvTableFileEditorProvider">
-        <state />
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/DLB/Utils/StateInfo.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1175,16 +1165,6 @@
         <state vertical-scroll-proportion="0.0">
           <caret line="188" column="0" selection-start-line="188" selection-start-column="0" selection-end-line="188" selection-end-column="0" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/DLB/AdapterThread.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="145" column="16" selection-start-line="145" selection-start-column="16" selection-end-line="145" selection-end-column="16" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
@@ -1256,9 +1236,19 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/src/DLB/AdapterThread.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="143" column="16" selection-start-line="143" selection-start-column="16" selection-end-line="143" selection-end-column="16" />
+          <folding>
+            <element signature="imports" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/src/DLB/MainThread.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.87540716">
+        <state vertical-scroll-proportion="0.8338762">
           <caret line="60" column="49" selection-start-line="60" selection-start-column="49" selection-end-line="60" selection-end-column="49" />
           <folding>
             <element signature="imports" expanded="true" />

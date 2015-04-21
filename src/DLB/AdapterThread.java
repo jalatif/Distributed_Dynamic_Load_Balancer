@@ -133,14 +133,12 @@ public class AdapterThread extends Thread {
         if (MainThread.isLocal)
             bootstrapJobs();
         if (MainThread.isLocal) {
-            synchronized (MainThread.jobInQueueLock) {
-                while (MainThread.jobsInQueue) {
-                    try {
-                        sleep(100);
-                    } catch (InterruptedException ie) {
-                        ie.printStackTrace();
-                        break;
-                    }
+            while (MainThread.jobsInQueue) {
+                try {
+                    sleep(100);
+                } catch (InterruptedException ie) {
+                    ie.printStackTrace();
+                    break;
                 }
             }
         } else {

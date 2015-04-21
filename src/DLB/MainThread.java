@@ -58,7 +58,7 @@ public class MainThread {
 
     private static int elementsDone;
 
-    protected static double throttlingValue = 0.4;
+    protected static double throttlingValue = 0.3;
     protected static boolean isLocal = !true;
 
     public MainThread() throws IOException, SigarException {
