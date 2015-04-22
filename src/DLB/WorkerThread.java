@@ -46,6 +46,14 @@ public class WorkerThread extends Thread {
         throttlingValue = tValue;
         workTime = (int) throttlingValue * MainThread.utilizationFactor;
         sleepTime = MainThread.utilizationFactor - workTime;
+        if (sleepHandle != null) {
+            if (!sleepHandle.isDone() || !sleepHandle.isCancelled())
+                sleepHandle.cancel(true);
+        }
+        if (workHandle != null) {
+            if (!workHandle.isDone() || !workHandle.isCancelled())
+                workHandle.cancel(true);
+        }
         setUpSleepTimer();
     }
 

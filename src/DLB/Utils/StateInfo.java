@@ -37,6 +37,15 @@ public class StateInfo implements Serializable {
                 '}';
     }
 
+    public String[] getFormattedKeys() {
+        return new String[]{"Queue Length", "CPU Usage", "BW Usage", "Timestamp"};
+    }
+
+    public String[] getFormattedValues() {
+        return new String[]{String.valueOf(queueLength), String.valueOf(cpuUsage),
+                String.valueOf(bwUsage), timestamp.toString()};
+    }
+
     public Date getTimestamp() {
         return timestamp;
     }

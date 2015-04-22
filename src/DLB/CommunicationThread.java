@@ -42,12 +42,14 @@ public class CommunicationThread extends Thread {
             return null;
         }
         String inString = incomingMsg.toString();
-        System.out.println("Message = " + inString.substring(0, Math.min(inString.length(), 80)));
+        //System.out.println("Message = " + inString.substring(0, Math.min(inString.length(), 80)));
         //System.out.println(incomingMsg.getClass());
 
         if (incomingMsg instanceof Message) {
             try {
                 Message msg = (Message) incomingMsg;
+                if (msg.getMsgType() != MessageType.JOBTRANSFER)
+                    System.out.println("Message = " + inString.substring(0, Math.min(inString.length(), 80)));
                 switch (msg.getMsgType()) {
                     case BULKJOBTRANSFER:
                         List<Job> jobs = (List<Job>) msg.getData();
@@ -108,6 +110,11 @@ public class CommunicationThread extends Thread {
                         System.out.println("Got HW State");
                         MainThread.adapterThread.addMessage(msg);
                         break;
+
+                    case TVALUE:
+                        MainThread.adapterThread.setThrottlingValue((double) msg.getData());
+                        break;
+
                     default:
                         System.out.println("Unknown message");
                 }

@@ -22,6 +22,7 @@ public class MainThread {
     protected static AdapterThread adapterThread;
     protected static HWMonitorThread hwMonitorThread;
     protected static CommunicationThread communicationThread;
+    protected static DynamicBalancerUI dynamicBalancerUI;
 
     protected volatile static boolean STOP_SIGNAL;
 
@@ -58,17 +59,20 @@ public class MainThread {
 
     private static int elementsDone;
 
-    protected static double throttlingValue = 0.4;
+    protected static double throttlingValue = 0.1;
     protected static boolean isLocal = !true;
-    protected static String ip = "172.17.116.149";//"jalatif2.ddns.net"; //"localhost";
+    protected static String ip = "localhost";//"jalatif2.ddns.net"; //"localhost";
     protected static int port = 2211;
 
     public MainThread() throws IOException, SigarException {
+        System.setProperty( "java.library.path", "lib" );
         transferManagerThread = new TransferManagerThread();
         stateManagerThread = new StateManagerThread();
         hwMonitorThread = new HWMonitorThread();
         adapterThread = new AdapterThread();
         communicationThread = new CommunicationThread();
+        if (isLocal)
+            dynamicBalancerUI = new DynamicBalancerUI();
     }
 
     public void start() throws InterruptedException {
@@ -87,6 +91,8 @@ public class MainThread {
         adapterThread.start();
         transferManagerThread.start();
         stateManagerThread.start();
+        if (isLocal)
+            dynamicBalancerUI.start();
     }
 
     protected static synchronized void addToResult(Job job) {
@@ -95,6 +101,12 @@ public class MainThread {
             vectorB[i] = data[i - job.getStartIndex()];
         }
         elementsDone += data.length;
+        if (isLocal) {
+            double progress = elementsDone * 10000.0;
+            progress = progress / (1.0 * numElements);
+            //dynamicBalancerUI.setProgress((int) progress);
+            dynamicBalancerUI.addMessage(new Message(MainThread.machineId, MessageType.Progress, progress));
+        }
         if (elementsDone == numElements) {
             System.out.println("Finished Computing everything");
             for (int i = 0; i < Math.min(numElements, numElementsPrint); i++)
@@ -158,7 +170,6 @@ public class MainThread {
         communicationThread.setUpStreams();
 
         communicationThread.start();
-
     }
 
     public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException, SigarException {
@@ -178,6 +189,5 @@ public class MainThread {
         communicationThread.sendMessage("Got connection from " + port);
 
         mainThread.start();
-
     }
 }
