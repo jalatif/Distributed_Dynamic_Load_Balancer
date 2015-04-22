@@ -130,8 +130,8 @@ public class TransferManagerThread extends Thread {
             MainThread.jobQueue.addFirst(job);
 
             // print jobs info ================================================
-            System.out.println("Job Data ----->");
-            System.out.println(job.getStartIndex() + " " + job.getEndIndex());
+            //System.out.println("Job Data ----->");
+            //System.out.println(job.getStartIndex() + " " + job.getEndIndex());
 //            Double[] data = job.getData();
 //            for (Double element : data) {
 //                System.out.print(element + " ");

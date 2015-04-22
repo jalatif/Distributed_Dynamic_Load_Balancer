@@ -6,6 +6,7 @@ import DLB.Utils.MessageType;
 import org.hyperic.sigar.SigarException;
 
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.net.*;
 import java.util.Arrays;
 import java.util.concurrent.BlockingDeque;
@@ -29,9 +30,9 @@ public class MainThread {
     protected static int numJobs = 1024;
     protected static int numWorkerThreads = 1;
 
-    protected static int utilizationFactor = 5000;
+    protected static int utilizationFactor = 1000;
     protected static int numElementsPrint = 10;
-    protected static int collectionRate = 500; // in ms
+    protected static int collectionRate = 50; // in ms
 
     protected static int queueDifferenceThreshold = 20;
     protected static int cpuThresholdLimit = 50;
@@ -60,12 +61,16 @@ public class MainThread {
     private static int elementsDone;
 
     protected static double throttlingValue = 0.1;
-    protected static boolean isLocal = !true;
-    protected static String ip = "localhost";//"jalatif2.ddns.net"; //"localhost";
+    protected static boolean isLocal = true;
+    protected static String ip = "172.17.116.149";//"jalatif2.ddns.net"; //"localhost";
     protected static int port = 2211;
 
-    public MainThread() throws IOException, SigarException {
+    public MainThread() throws IOException, SigarException, IllegalAccessException, NoSuchFieldException {
         System.setProperty( "java.library.path", "lib" );
+        Field fieldSysPath = ClassLoader.class.getDeclaredField( "sys_paths" );
+        fieldSysPath.setAccessible( true );
+        fieldSysPath.set(null, null);
+
         transferManagerThread = new TransferManagerThread();
         stateManagerThread = new StateManagerThread();
         hwMonitorThread = new HWMonitorThread();
@@ -172,7 +177,9 @@ public class MainThread {
         communicationThread.start();
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException, SigarException {
+    public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException,
+            SigarException, NoSuchFieldException, IllegalAccessException {
+
         if (args.length >= 1 && args[0].equals("remote"))
             isLocal = false;
         if (args.length >= 2)
