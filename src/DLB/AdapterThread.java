@@ -4,7 +4,9 @@ import DLB.Utils.Job;
 import DLB.Utils.Message;
 import DLB.Utils.MessageType;
 import DLB.Utils.StateInfo;
+import org.hyperic.sigar.SigarException;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.LinkedList;
@@ -41,12 +43,53 @@ public class AdapterThread extends Thread {
         }
     }
 
-    private void adapterWork() throws InterruptedException {
+    private void workTransferCalc(StateInfo sRemote, StateInfo sLocal, int transferFlag) {
+        System.out.println("TRASFER FLAG :" + transferFlag);
+        System.out.println("SLOCAL IS :" + sLocal);
+        System.out.println("SREMOTE IS :" + sRemote);
+        switch (transferFlag) {
+            case 0: // case when only queue length is considered.
+                if ((sLocal.getQueueLength() - sRemote.getQueueLength()) > MainThread.queueDifferenceThreshold) {
+                    int jobsToSend = (sLocal.getQueueLength() - sRemote.getQueueLength()) / 2;
+                    Message msg = new Message(MainThread.machineId, MessageType.JOBTRANSFER, jobsToSend);
+                    System.out.println("Matching expected time to finish by sending " + jobsToSend + " number of jobs");
+                    MainThread.transferManagerThread.addMessage(msg);
+                }
+            break;
+
+            case 1: // case when time to completion is considered.
+                System.out.println("CASE CASE CASE CASE 1");
+//                x * bytesperjob / bw = (jobqlength - x) * timetocomplteonejob * throttlefactor
+//                lhs  =  rhs - gaurd
+//                WorkerThread.timePerJob * MainThread.throttlingValue;
+                double remoteMetrics = sRemote.getTimePerJob() * sRemote.getQueueLength() * sRemote.getThrottlingValue();
+                double localMetrics = sLocal.getTimePerJob() * sLocal.getQueueLength() * sLocal.getThrottlingValue();
+                int remoteQ = sRemote.getQueueLength();
+                int localQ = sLocal.getQueueLength();
+                int jobsToSend = 0 ;
+
+                if (localMetrics > remoteMetrics + MainThread.GUARD) {
+                    while ((localMetrics - remoteMetrics) >= MainThread.GUARD) {
+                        localQ--;
+                        localMetrics = sLocal.getTimePerJob() * localQ * sLocal.getThrottlingValue();
+                        jobsToSend++;
+                    }
+                    Message msg = new Message(MainThread.machineId, MessageType.JOBTRANSFER, jobsToSend);
+                    System.out.println("Matching expected time to finish by sending " + jobsToSend + " number of jobs");
+                    MainThread.transferManagerThread.addMessage(msg);
+                }
+                break;
+        }
+
+    }
+
+    private void adapterWork() throws InterruptedException, SigarException, IOException {
         Message incomingMsg = messages.take();
         // sleep switch worker
         // queue check - call function accordingly
 
         if (incomingMsg.getMsgType() != MessageType.HW) return;
+
 
         StateInfo sRemote = (StateInfo) incomingMsg.getData();
         StateInfo sLocal = MainThread.hwMonitorThread.getCurrentState();
@@ -67,13 +110,8 @@ public class AdapterThread extends Thread {
             if (MainThread.jobsInComing) return;
         }
 
-        if ((sLocal.getQueueLength() - sRemote.getQueueLength()) > MainThread.queueDifferenceThreshold) {
-            int jobsToSend = (sLocal.getQueueLength() - sRemote.getQueueLength()) / 2;
-            Message msg = new Message(MainThread.machineId, MessageType.JOBTRANSFER, jobsToSend);
-            System.out.println("Matching expected time to finish by sending " + jobsToSend + " number of jobs");
-            MainThread.transferManagerThread.addMessage(msg);
-        }
-
+        System.out.println("TEST");
+        workTransferCalc(sRemote, sLocal, MainThread.transferFlag);
 
 //
 //        if (lastStateTime != null && lastStateTime.compareTo(sLocal.getTimestamp()) < 1) return;
@@ -183,6 +221,10 @@ public class AdapterThread extends Thread {
             } catch (InterruptedException ie) {
                 ie.printStackTrace();
                 MainThread.stop();
+            } catch (SigarException e) {
+                e.printStackTrace();
+            } catch (IOException e) {
+                e.printStackTrace();
             }
         }
     }

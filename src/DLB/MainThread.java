@@ -3,6 +3,7 @@ package DLB;
 import DLB.Utils.Job;
 import DLB.Utils.Message;
 import DLB.Utils.MessageType;
+import DLB.Utils.SystemStat;
 import org.hyperic.sigar.SigarException;
 
 import java.io.IOException;
@@ -26,6 +27,7 @@ public class MainThread {
     protected static DynamicBalancerUI dynamicBalancerUI;
 
     protected volatile static boolean STOP_SIGNAL;
+    protected volatile static double GUARD;
 
     protected static int numJobs = 1024;
     protected static int numWorkerThreads = 1;
@@ -47,6 +49,8 @@ public class MainThread {
     protected static ServerSocket serverSocket;
     protected static Socket otherSocket;
     protected volatile static Socket mySocket;
+    protected volatile static int transferFlag;
+    protected volatile static double timePerJob;
 
 
     protected static int machineId = 0;
@@ -61,11 +65,12 @@ public class MainThread {
     private static int elementsDone;
 
     protected static double throttlingValue = 0.01;
-    protected static boolean isLocal = true;
+    protected static boolean isLocal = !true;
     protected static String ip = "172.17.116.149";//"jalatif2.ddns.net"; //"localhost";
     protected static int port = 2211;
 
-    public MainThread() throws IOException, SigarException, IllegalAccessException, NoSuchFieldException {
+    public MainThread() throws IOException, SigarException, IllegalAccessException,
+                                                            NoSuchFieldException, InterruptedException {
 //        System.out.println(getClass().getClassLoader().getResource(".").getPath());
 //        String path = getClass().getClassLoader().getResource("DLB/res/lib").getPath();
 //        System.out.println(path);
@@ -178,10 +183,32 @@ public class MainThread {
         communicationThread.setUpStreams();
 
         communicationThread.start();
+
     }
 
+    public void timePerJobCalc() {
+        int elementsPerJob = MainThread.numElements / MainThread.numJobs;
+        long timeTotal= 0 ;
+        for (int i = 0; i < 10; i++) { // calculating 10 times average
+            long t1 = System.currentTimeMillis();
+            double[] data = new double[elementsPerJob];
+            Arrays.fill(data, MainThread.initVal);
+            for (int j = 0; j < elementsPerJob; j++) { // a job unit
+                data[j] = data[j] + MainThread.addVal;
+            }
+            long t2 = System.currentTimeMillis();
+            timeTotal += (t2 - t1);
+        }
+        System.out.println("TOTAL TIME FOR 10 JOBS in ms : " + timeTotal);
+        MainThread.timePerJob = ((double)(timeTotal)/10);
+    }
+
+
+
     public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException,
-            SigarException, NoSuchFieldException, IllegalAccessException {
+                                                    SigarException, NoSuchFieldException, IllegalAccessException {
+        MainThread.GUARD = 0.5;
+        MainThread.transferFlag = 0;// 0 default only queue length
 
         if (args.length >= 1 && args[0].equals("remote"))
             isLocal = false;
@@ -193,9 +220,17 @@ public class MainThread {
             ip = args[3];
         if (args.length >= 5)
             port = Integer.parseInt(args[4]);
+        if (args.length >= 6)
+            MainThread.GUARD = Integer.parseInt(args[5]);
+        if (args.length >= 7)
+            MainThread.transferFlag = Integer.parseInt(args[6]);
 
 
         MainThread mainThread = new MainThread();
+
+        mainThread.timePerJobCalc();
+        System.out.println("TIME PER JOB ON MACHINE ID #"+ MainThread.machineId + " IS (in ms) :" + MainThread.timePerJob);
+        
         mainThread.connect(ip, port);
 
         communicationThread.sendMessage("Got connection from " + port);

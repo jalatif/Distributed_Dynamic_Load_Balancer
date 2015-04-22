@@ -7,6 +7,8 @@ import DLB.Utils.StateInfo;
 
 import java.io.*;
 import java.util.List;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.GZIPOutputStream;
 
 /**
  * Created by manshu on 4/16/15.
@@ -14,14 +16,20 @@ import java.util.List;
 public class CommunicationThread extends Thread {
     private ObjectOutputStream dout;
     private ObjectInputStream din;
-
+    private GZIPOutputStream gzout;
+    private GZIPInputStream gzin;
 
     public CommunicationThread() throws IOException {
         dout = null;
         din = null;
+        gzout = null;
+        gzin = null;
     }
 
     public void setUpStreams() throws IOException {
+//        gzout = new GZIPOutputStream(MainThread.mySocket.getOutputStream());
+//        gzin = new GZIPInputStream(MainThread.mySocket.getInputStream());
+
         dout = new ObjectOutputStream(MainThread.mySocket.getOutputStream());
         din  = new ObjectInputStream(MainThread.mySocket.getInputStream());
     }
@@ -83,6 +91,9 @@ public class CommunicationThread extends Thread {
                     case JOBTRANSFERACK:
                         synchronized (MainThread.jobInQueueLock) {
                             MainThread.jobsInQueue = false;
+                        }
+                        synchronized (MainThread.jobInComingLock) {
+                            MainThread.jobsInComing = false;
                         }
                         System.out.println("Jobs successfully transferred to other node");
                         break;

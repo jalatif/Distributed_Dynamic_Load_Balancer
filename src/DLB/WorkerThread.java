@@ -3,6 +3,8 @@ package DLB;
 import DLB.Utils.Job;
 import DLB.Utils.Message;
 import DLB.Utils.MessageType;
+import DLB.Utils.SystemStat;
+
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
@@ -21,6 +23,7 @@ public class WorkerThread extends Thread {
     private ScheduledExecutorService scheduler;
     private ScheduledFuture<?> workHandle, sleepHandle;
     private Job currentJob;
+    protected static double timePerJob ;
 
     public WorkerThread(int index, double tValue) {
         this.index = index;
@@ -32,13 +35,19 @@ public class WorkerThread extends Thread {
         workHandle = null;
         sleepHandle = null;
         setUpSleepTimer();
+
     }
 
     private Job getResult(Job job) {
+        //long t1 = System.currentTimeMillis();
         Double[] data = job.getData();
         for (int i = 0; i < data.length; i++) {
             data[i] = data[i] + MainThread.addVal;
         }
+//        long t2 = System.currentTimeMillis();
+//        if ((long) timePerJob == 0){
+//            WorkerThread.timePerJob = (double) (t2 - t1);
+//        }
         return new Job(job.getStartIndex(), job.getEndIndex(), data);
     }
 

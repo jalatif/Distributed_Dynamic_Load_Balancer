@@ -2,6 +2,7 @@ package DLB;
 
 import DLB.Utils.Message;
 import DLB.Utils.MessageType;
+import DLB.Utils.NetworkData;
 import DLB.Utils.StateInfo;
 import org.hyperic.sigar.*;
 
@@ -17,12 +18,14 @@ public class HWMonitorThread extends Thread {
     private NetStat net;
     private CpuPerc cpuPerc;
     private double cpu_usage = 0.0, nw_usage = 0.0;
+    private NetworkData nwData;
 
-    public HWMonitorThread() throws SigarException {
+    public HWMonitorThread() throws SigarException, InterruptedException {
         sigar = new Sigar();
         cpu = null;
         pid = sigar.getPid(); // this one gives me the same process ID that I see in visualVM
         cpuPerc = sigar.getCpuPerc();
+        nwData = new NetworkData(sigar);
         System.out.println("PID of the process is " + pid);
     }
 
@@ -38,22 +41,34 @@ public class HWMonitorThread extends Thread {
         return cpu_usage;
     }
 
-    private double getNwUsage() {
-        try {
-            net = sigar.getNetStat();
-        } catch (SigarException e) {
-            e.printStackTrace();
-            return nw_usage;
-        }
-        nw_usage = net.getAllInboundTotal() + net.getAllOutboundTotal();
-        return nw_usage;
+    private double getNwUsage() throws InterruptedException, SigarException {
+        System.out.println("INSIDE NETWORK");
+        return NetworkData.startMetricTest();
+//        try {
+//            net = sigar.getNetStat();
+//        } catch (SigarException e) {
+//            e.printStackTrace();
+//            return nw_usage;
+//        }
+//        nw_usage = net.getAllInboundTotal() + net.getAllOutboundTotal();
+//        return nw_usage;
     }
 
-    protected StateInfo getCurrentState() {
-        return new StateInfo(MainThread.jobQueue.size(), getCpuUsage(), getNwUsage());
+    private double getTimePerJob() {
+//        System.out.println("********************** TIME PER JOB ***************************" + MainThread.timePerJob);
+        return MainThread.timePerJob;
     }
 
-    private void doMonitoring() throws IOException {
+    private double getThrottlingValue() {
+        return MainThread.throttlingValue;
+    }
+
+    protected StateInfo getCurrentState() throws SigarException, InterruptedException {
+//        return new StateInfo(MainThread.jobQueue.size(), getCpuUsage(), getNwUsage(), getTimePerJob(), getThrottlingValue() );
+        return new StateInfo(MainThread.jobQueue.size(), getCpuUsage(), 0.0, getTimePerJob(), getThrottlingValue() );
+    }
+
+    private void doMonitoring() throws IOException, SigarException, InterruptedException {
         synchronized (MainThread.jobInQueueLock) {
             if (MainThread.jobsInQueue) return;
         }
@@ -80,6 +95,8 @@ public class HWMonitorThread extends Thread {
                 ie.printStackTrace();
                 System.out.println("Cannot continue w/o connection");
                 MainThread.stop();
+            } catch (SigarException e) {
+                e.printStackTrace();
             }
         }
     }
