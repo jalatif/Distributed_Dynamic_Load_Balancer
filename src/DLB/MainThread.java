@@ -32,7 +32,7 @@ public class MainThread {
 
     protected static int utilizationFactor = 100;
     protected static int numElementsPrint = 10;
-    protected static int collectionRate = 15; // in ms
+    protected static int collectionRate = 2; // in ms
 
     protected static int queueDifferenceThreshold = 20;
     protected static int cpuThresholdLimit = 10;
@@ -188,9 +188,11 @@ public class MainThread {
         if (args.length >= 2)
             throttlingValue = Double.parseDouble(args[1]);
         if (args.length >= 3)
-            ip = args[2];
+            collectionRate = Integer.parseInt(args[2]);
         if (args.length >= 4)
-            port = Integer.parseInt(args[3]);
+            ip = args[3];
+        if (args.length >= 5)
+            port = Integer.parseInt(args[4]);
 
 
         MainThread mainThread = new MainThread();
