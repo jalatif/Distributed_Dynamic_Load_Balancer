@@ -3,6 +3,7 @@ package DLB;
 import DLB.Utils.Job;
 import DLB.Utils.Message;
 import DLB.Utils.MessageType;
+import DLB.Utils.StateInfo;
 
 import java.io.*;
 import java.util.List;
@@ -83,9 +84,6 @@ public class CommunicationThread extends Thread {
                         synchronized (MainThread.jobInQueueLock) {
                             MainThread.jobsInQueue = false;
                         }
-                        synchronized (MainThread.jobInComingLock) {
-                            MainThread.jobsInComing = false;
-                        }
                         System.out.println("Jobs successfully transferred to other node");
                         break;
 
@@ -108,11 +106,19 @@ public class CommunicationThread extends Thread {
                         break;
                     case HW:
                         System.out.println("Got HW State");
+                        if (MainThread.isLocal) {
+                            MainThread.dynamicBalancerUI.addMessage(new Message(msg.getMachineId(), MessageType.SM,
+                                    msg.getData()));
+                        }
                         MainThread.adapterThread.addMessage(msg);
                         break;
 
                     case TVALUE:
                         MainThread.adapterThread.setThrottlingValue((double) msg.getData());
+                        break;
+
+                    case UITVALUE:
+                        MainThread.dynamicBalancerUI.addMessage(msg);
                         break;
 
                     default:

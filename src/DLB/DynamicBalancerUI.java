@@ -8,8 +8,6 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.util.concurrent.LinkedBlockingQueue;
 
 /**
@@ -55,8 +53,14 @@ public class DynamicBalancerUI extends Thread {
         jTables = new JTable[numMachines];
         jScrollPanes = new JScrollPane[numMachines];
 
-        ImageIcon machine = new ImageIcon("res/pc-icon.png");
-        ImageIcon file = new ImageIcon("res/file.png");
+//        String path = MainThread.class.getClass().getResource("DLB/res/images").getPath();
+//
+//        ImageIcon machine = new ImageIcon(path + "/pc-icon.png");
+//        ImageIcon file = new ImageIcon(path + "/file.png");
+
+        ImageIcon machine = new ImageIcon("res/images/pc-icon.png");
+        ImageIcon file = new ImageIcon("res/images/file.png");
+
         tempFile = new JLabel(file);
 
         for (int i = 0; i < numMachines; i++) {
@@ -64,7 +68,7 @@ public class DynamicBalancerUI extends Thread {
             jSpinners[i] = new JSpinner(new SpinnerNumberModel(MainThread.throttlingValue, 0.0, 1.0, 0.1));
             jSpinners[i].setName(String.valueOf(i));
             jSpinners[i].setPreferredSize(new Dimension(100, 50));
-            ((JSpinner.DefaultEditor) jSpinners[i].getEditor()).getTextField().setEditable(false);
+            //((JSpinner.DefaultEditor) jSpinners[i].getEditor()).getTextField().setEditable(false);
 
             //label
             jLabels[i] = new JLabel(machine);
@@ -216,6 +220,10 @@ public class DynamicBalancerUI extends Thread {
         messageQueue.add(msg);
     }
 
+    private void setThrottleValues(int machineId, double value) {
+        jSpinners[machineId].setValue(value);
+    }
+
     private void updateUI() throws InterruptedException {
         Message msg = messageQueue.take();
         System.out.println("UI has got a message " + msg);
@@ -229,6 +237,10 @@ public class DynamicBalancerUI extends Thread {
             case SM:
                 System.out.println("State Update");
                 setState(msg.getMachineId(), (StateInfo) msg.getData());
+                break;
+            case UITVALUE:
+                System.out.println("Updating throttle value " + msg);
+                setThrottleValues(msg.getMachineId(), (double) msg.getData());
                 break;
             default:
                 break;
@@ -256,7 +268,6 @@ public class DynamicBalancerUI extends Thread {
                 e.printStackTrace();
             }
         }
-        jFrame.setVisible(false);
     }
 
     public static void main(String[] args) {

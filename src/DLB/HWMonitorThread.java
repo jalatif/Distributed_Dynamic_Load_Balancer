@@ -54,7 +54,13 @@ public class HWMonitorThread extends Thread {
     }
 
     private void doMonitoring() throws IOException {
-        //if (MainThread.jobsInQueue || MainThread.jobsInComing) return;
+        synchronized (MainThread.jobInQueueLock) {
+            if (MainThread.jobsInQueue) return;
+        }
+
+        synchronized (MainThread.jobInComingLock) {
+            if (MainThread.jobsInComing) return;
+        }
         //int queue_length = MainThread.jobQueue.size();
         StateInfo state = getCurrentState();//new StateInfo(queue_length, getCpuUsage(), getNwUsage());
         Message msg = new Message(MainThread.machineId, MessageType.HW, state);

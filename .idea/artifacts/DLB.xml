@@ -1,7 +1,7 @@
 <component name="ArtifactManager">
   <artifact type="jar" build-on-make="true" name="DLB">
     <output-path>$PROJECT_DIR$/out/artifacts/DLB</output-path>
-    <root id="archive" name="DLB.jar">
+    <root id="archive" name="MP4_DLB.jar">
       <element id="module-output" name="MP4_DLB" />
       <element id="extracted-dir" path="$USER_HOME$/Setups/sigar-1.6.4.jar" path-in-jar="/" />
     </root>

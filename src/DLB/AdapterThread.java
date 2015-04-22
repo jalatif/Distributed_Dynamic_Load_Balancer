@@ -63,6 +63,10 @@ public class AdapterThread extends Thread {
             if (MainThread.jobsInQueue) return;
         }
 
+        synchronized (MainThread.jobInComingLock) {
+            if (MainThread.jobsInComing) return;
+        }
+
         if ((sLocal.getQueueLength() - sRemote.getQueueLength()) > MainThread.queueDifferenceThreshold) {
             int jobsToSend = (sLocal.getQueueLength() - sRemote.getQueueLength()) / 2;
             Message msg = new Message(MainThread.machineId, MessageType.JOBTRANSFER, jobsToSend);
@@ -140,6 +144,13 @@ public class AdapterThread extends Thread {
 
     @Override
     public void run() {
+        Message msg = new Message(MainThread.machineId, MessageType.UITVALUE, throttlingValue);
+        if (MainThread.isLocal) {
+            MainThread.dynamicBalancerUI.addMessage(msg);
+        } else {
+            MainThread.transferManagerThread.addMessage(msg);
+        }
+
         if (MainThread.isLocal)
             bootstrapJobs();
         if (MainThread.isLocal) {

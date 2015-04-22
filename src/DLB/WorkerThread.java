@@ -109,6 +109,12 @@ public class WorkerThread extends Thread {
 
 
     private void doWork() throws InterruptedException {
+        synchronized (MainThread.jobInQueueLock) {
+            if (MainThread.jobsInQueue) return;
+        }
+        synchronized (MainThread.jobInComingLock) {
+            if (MainThread.jobsInComing) return;
+        }
         Job job;
         if (currentJob != null)
             job = currentJob;

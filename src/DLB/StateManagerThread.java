@@ -1,6 +1,8 @@
 package DLB;
 
 import DLB.Utils.Message;
+import DLB.Utils.MessageType;
+import DLB.Utils.StateInfo;
 
 import java.io.IOException;
 import java.util.concurrent.BlockingQueue;
@@ -23,6 +25,10 @@ public class StateManagerThread extends Thread {
 
     private void stateTransferWork() throws IOException, InterruptedException {
         Message incomingMsg = messages.take();
+        if (MainThread.isLocal) {
+            MainThread.dynamicBalancerUI.addMessage(new Message(incomingMsg.getMachineId(), MessageType.SM,
+                    incomingMsg.getData()));
+        }
         switch (incomingMsg.getMsgType()) {
             default:
                 MainThread.communicationThread.sendMessage(incomingMsg);

@@ -30,12 +30,12 @@ public class MainThread {
     protected static int numJobs = 1024;
     protected static int numWorkerThreads = 1;
 
-    protected static int utilizationFactor = 1000;
+    protected static int utilizationFactor = 100;
     protected static int numElementsPrint = 10;
-    protected static int collectionRate = 50; // in ms
+    protected static int collectionRate = 5; // in ms
 
     protected static int queueDifferenceThreshold = 20;
-    protected static int cpuThresholdLimit = 50;
+    protected static int cpuThresholdLimit = 10;
 
     protected static int numElements = 1024 * 1024 * 32;//1024 * 1024 * 32;
     protected static double initVal = 1.111111, addVal = 1.111111;
@@ -60,16 +60,19 @@ public class MainThread {
 
     private static int elementsDone;
 
-    protected static double throttlingValue = 0.1;
+    protected static double throttlingValue = 0.01;
     protected static boolean isLocal = true;
     protected static String ip = "172.17.116.149";//"jalatif2.ddns.net"; //"localhost";
     protected static int port = 2211;
 
     public MainThread() throws IOException, SigarException, IllegalAccessException, NoSuchFieldException {
-        System.setProperty( "java.library.path", "lib" );
-        Field fieldSysPath = ClassLoader.class.getDeclaredField( "sys_paths" );
-        fieldSysPath.setAccessible( true );
-        fieldSysPath.set(null, null);
+//        System.out.println(getClass().getClassLoader().getResource(".").getPath());
+//        String path = getClass().getClassLoader().getResource("DLB/res/lib").getPath();
+//        System.out.println(path);
+//        System.setProperty("java.library.path", path);
+//        Field fieldSysPath = ClassLoader.class.getDeclaredField( "sys_paths" );
+//        fieldSysPath.setAccessible( true );
+//        fieldSysPath.set(null, null);
 
         transferManagerThread = new TransferManagerThread();
         stateManagerThread = new StateManagerThread();

@@ -116,6 +116,9 @@ public class TransferManagerThread extends Thread {
             case TVALUE:
                 MainThread.communicationThread.sendMessage(incomingMsg);
                 break;
+            case UITVALUE:
+                MainThread.communicationThread.sendMessage(incomingMsg);
+                break;
             default:
                 MainThread.communicationThread.sendMessage(incomingMsg);
                 break;
