@@ -110,6 +110,9 @@ public class TransferManagerThread extends Thread {
                 }
                 sendRequiredJob(incomingMsg);
                 break;
+            case JOBTRANSFERACK:
+                MainThread.communicationThread.sendMessage(incomingMsg);
+                break;
             case JOBRESULT:
                 sendResults(incomingMsg);
                 break;

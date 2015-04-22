@@ -32,7 +32,7 @@ public class MainThread {
 
     protected static int utilizationFactor = 100;
     protected static int numElementsPrint = 10;
-    protected static int collectionRate = 5; // in ms
+    protected static int collectionRate = 15; // in ms
 
     protected static int queueDifferenceThreshold = 20;
     protected static int cpuThresholdLimit = 10;

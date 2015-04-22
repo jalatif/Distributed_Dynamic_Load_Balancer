@@ -100,6 +100,7 @@ public class CommunicationThread extends Thread {
                         System.out.println("OkAck message sent");
                         MainThread.stop();
                         break;
+
                     case OkACK:
                         System.out.println("Got Ok ack");
                         MainThread.stop();
