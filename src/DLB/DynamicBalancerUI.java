@@ -22,6 +22,7 @@ public class DynamicBalancerUI extends Thread {
     StateInfo[] machineStates;
     JSpinner[] jSpinners;
     JProgressBar jProgressBar;
+    JProgressBar jResultBar;
     JLabel[] jLabels;
     JLabel[] jFiles;
     JLabel tempFile;
@@ -89,7 +90,7 @@ public class DynamicBalancerUI extends Thread {
 
             //table
             jScrollPanes[i] = new JScrollPane();
-            jTables[i] = new JTable(getStateData(new StateInfo(0)), columnNames);
+            jTables[i] = new JTable(getStateData(new StateInfo(0, 0, false, false)), columnNames);
             //jTables[i].setMinimumSize(new Dimension(200, 200));
             jTables[i].setRowHeight(50);
             jTables[i].setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -116,13 +117,22 @@ public class DynamicBalancerUI extends Thread {
         jProgressBar.setMaximum(10000);
         jFrame.add(jProgressBar);
         setProgress(0);
+
+        jResultBar = new JProgressBar();
+        jResultBar.setStringPainted(true);
+        jResultBar.setPreferredSize(new Dimension(500, 50));
+        jResultBar.setMinimum(0);
+        jResultBar.setMaximum(100);
+        jFrame.add(jResultBar);
+        setResultProgress(0);
+
         setActionListeners();
     }
 
     private void changeLooks() {
         try {
             for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
-                System.out.println(info.getName());
+                //System.out.println(info.getName());
                 if ("Nimbus".equals(info.getName())) {
                     UIManager.setLookAndFeel(info.getClassName());
                 }
@@ -165,15 +175,27 @@ public class DynamicBalancerUI extends Thread {
             if (status) {
                 jTransInfos[machineId].setName("red");
                 jTransInfos[machineId].setIcon(red_button);
-                jchannelInfos[machineId].setText("Channel sending");
+                jchannelInfos[machineId].setText("Channel  Send");
             }
         } else {
             if (!status) {
                 jTransInfos[machineId].setName("green");
                 jTransInfos[machineId].setIcon(green_button);
-                jchannelInfos[machineId].setText("Channel empty");
+                jchannelInfos[machineId].setText("Channel Empty");
             }
         }
+    }
+
+    protected void setResultProgress(int progress) {
+        jResultBar.setValue(progress);
+        if (progress <= 25) {
+            jResultBar.setForeground(Color.RED);
+        } else if (progress > 25 && progress < 75) {
+            jResultBar.setForeground(Color.BLUE);
+        } else if (progress >= 75) {
+            jResultBar.setForeground(Color.GREEN);
+        }
+        jResultBar.setString(progress + "%");
     }
 
     protected void setProgress(int progress) {
@@ -264,11 +286,13 @@ public class DynamicBalancerUI extends Thread {
     private void updateUI() throws InterruptedException {
         Message msg = messageQueue.take();
         System.out.println("UI has got a message " + msg);
+        double progress = 0.0;
+        Long prg = 0l;
         switch (msg.getMsgType()) {
             case Progress:
                 System.out.println("Progress Update");
-                double progress = (double) msg.getData();
-                Long prg = Math.round(progress);
+                progress = (double) msg.getData();
+                prg = Math.round(progress);
                 setProgress(prg.intValue());
                 break;
             case SM:
@@ -278,6 +302,12 @@ public class DynamicBalancerUI extends Thread {
             case UITVALUE:
                 System.out.println("Updating throttle value " + msg);
                 setThrottleValues(msg.getMachineId(), (double) msg.getData());
+                break;
+            case ResultProgress:
+                System.out.println("Result Progress Update");
+                progress = (double) msg.getData();
+                prg = Math.round(progress);
+                setResultProgress(prg.intValue());
                 break;
             default:
                 break;

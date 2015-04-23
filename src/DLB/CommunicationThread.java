@@ -18,20 +18,22 @@ public class CommunicationThread extends Thread {
     private ObjectInputStream din;
     private GZIPOutputStream gzout;
     private GZIPInputStream gzin;
+    private int socketNum = 0;
 
-    public CommunicationThread() throws IOException {
+    public CommunicationThread(int socketNum) throws IOException {
         dout = null;
         din = null;
         gzout = null;
         gzin = null;
+        this.socketNum = socketNum;
     }
 
     public void setUpStreams() throws IOException {
 //        gzout = new GZIPOutputStream(MainThread.mySocket.getOutputStream());
 //        gzin = new GZIPInputStream(MainThread.mySocket.getInputStream());
 
-        dout = new ObjectOutputStream(MainThread.mySocket.getOutputStream());
-        din  = new ObjectInputStream(MainThread.mySocket.getInputStream());
+        dout = new ObjectOutputStream(MainThread.mySocket[socketNum].getOutputStream());
+        din  = new ObjectInputStream(MainThread.mySocket[socketNum].getInputStream());
     }
 
     public synchronized void sendMessage(Object message) throws IOException {
@@ -101,12 +103,6 @@ public class CommunicationThread extends Thread {
                         if (MainThread.isLocal) {
                             MainThread.dynamicBalancerUI.changeTransferStatus(MainThread.machineId, false);
                         }
-                        synchronized (MainThread.jobInComingLock) {
-                            MainThread.jobsInComing = false;
-                        }
-                        if (MainThread.isLocal) {
-                            MainThread.dynamicBalancerUI.changeTransferStatus(msg.getMachineId(), false);
-                        }
                         System.out.println("Jobs successfully transferred to other node");
                         break;
 
@@ -118,12 +114,16 @@ public class CommunicationThread extends Thread {
 
                     case FinishACK:
                         System.out.println("Got finished ack");
-                        Message okMsg = new Message(MainThread.machineId, MessageType.OkACK, 0);
-                        MainThread.transferManagerThread.addMessage(msg); //sendMessage(okMsg);
-                        System.out.println("OkAck message sent");
-                        MainThread.stop();
+                        MainThread.processingDone = true;
+                        if (!MainThread.isLocal) {
+                            MainThread.transferManagerThread.addMessage(new Message(MainThread.machineId,
+                                    MessageType.BULKJOBRESULT, 0));
+                        }
+//                        Message okMsg = new Message(MainThread.machineId, MessageType.OkACK, 0);
+//                        MainThread.transferManagerThread.addMessage(msg); //sendMessage(okMsg);
+//                        System.out.println("OkAck message sent");
+//                        MainThread.stop();
                         break;
-
                     case OkACK:
                         System.out.println("Got Ok ack");
                         MainThread.stop();

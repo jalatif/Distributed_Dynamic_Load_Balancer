@@ -23,32 +23,35 @@ public class MainThread {
     protected static StateManagerThread stateManagerThread;
     protected static AdapterThread adapterThread;
     protected static HWMonitorThread hwMonitorThread;
-    protected static CommunicationThread communicationThread;
+    protected static CommunicationThread[] communicationThread;
     protected static DynamicBalancerUI dynamicBalancerUI;
 
     protected volatile static boolean STOP_SIGNAL;
     protected volatile static double GUARD;
 
-    protected static int numJobs = 1024;
+    protected static int numJobs = 2048;
     protected static int numWorkerThreads = 1;
 
     protected static int utilizationFactor = 100;
     protected static int numElementsPrint = 10;
-    protected static int collectionRate = 2; // in ms
+    protected static int collectionRate = 5; // in ms
 
     protected static int queueDifferenceThreshold = 20;
     protected static int cpuThresholdLimit = 10;
 
     protected static int numElements = 1024 * 1024 * 32;//1024 * 1024 * 32;
+
     protected static double initVal = 1.111111, addVal = 1.111111;
     protected static double[] vectorA;
     protected static double[] vectorB;
 
     protected static BlockingDeque<Job> jobQueue;
+    protected static BlockingDeque<Job> resultantJobQueue;
 
-    protected static ServerSocket serverSocket;
-    protected static Socket otherSocket;
-    protected volatile static Socket mySocket;
+    protected static ServerSocket serverSocket[];
+
+    protected volatile static Socket mySocket[];
+
     protected volatile static int transferFlag;
     protected volatile static double timePerJob;
 
@@ -56,18 +59,28 @@ public class MainThread {
     protected static int machineId = 0;
 
     // locks for 2 volatile variables.
-    protected static volatile Lock jobInQueueLock = new ReentrantLock(true);
-    protected static volatile Lock jobInComingLock = new ReentrantLock(true);
+    protected static volatile Object jobInQueueLock = new Object();
+    protected static volatile Object jobInComingLock = new Object();
 
     protected static volatile boolean jobsInQueue = false;
     protected static volatile boolean jobsInComing = false;
 
-    private static int elementsDone;
+    protected static int elementsDone;
+    protected static int localJobsDone;
+    protected static int remoteJobsDone;
+    protected static boolean processingDone;
+    protected static int resultTransferred;
+    protected static int finalRemoteJobs;
 
     protected static double throttlingValue = 0.01;
     protected static boolean isLocal = !true;
     protected static String ip = "172.17.116.149";//"jalatif2.ddns.net"; //"localhost";
-    protected static int port = 2211;
+    protected static int[] port = {2211, 2212, 2213};
+    protected static enum TRANSFER_TYPE {
+        DATA,
+        STATE,
+        RESULT
+    }
 
     public MainThread() throws IOException, SigarException, IllegalAccessException,
                                                             NoSuchFieldException, InterruptedException {
@@ -83,24 +96,44 @@ public class MainThread {
         stateManagerThread = new StateManagerThread();
         hwMonitorThread = new HWMonitorThread();
         adapterThread = new AdapterThread();
-        communicationThread = new CommunicationThread();
+        communicationThread = new CommunicationThread[TRANSFER_TYPE.values().length];
+        for (int i = 0; i < TRANSFER_TYPE.values().length; i++) {
+            communicationThread[i] = new CommunicationThread(i);
+        }
         if (isLocal)
             dynamicBalancerUI = new DynamicBalancerUI();
     }
 
+    protected static synchronized void setLocalJobsDone(int jobs) {
+        localJobsDone = jobs;
+    }
+
+    protected static synchronized void setRemoteJobsDone(int jobs) {
+        remoteJobsDone = jobs;
+    }
+
     public void start() throws InterruptedException {
         STOP_SIGNAL = false;
+        processingDone = false;
+        finalRemoteJobs = 0;
 
         if (!isLocal) machineId = 1;
 
         jobQueue = new LinkedBlockingDeque<Job>();
+        if (!isLocal)
+            resultantJobQueue = new LinkedBlockingDeque<Job>();
+
         if (isLocal) {
             vectorA = new double[numElements];
             Arrays.fill(vectorA, initVal);
 
             vectorB = new double[numElements];
             elementsDone = 0;
+            remoteJobsDone = 0;
+            localJobsDone = 0;
+            resultTransferred = 0;
         }
+
         adapterThread.start();
         transferManagerThread.start();
         stateManagerThread.start();
@@ -114,22 +147,35 @@ public class MainThread {
             vectorB[i] = data[i - job.getStartIndex()];
         }
         elementsDone += data.length;
-        if (isLocal) {
-            double progress = elementsDone * 10000.0;
-            progress = progress / (1.0 * numElements);
-            //dynamicBalancerUI.setProgress((int) progress);
-            dynamicBalancerUI.addMessage(new Message(MainThread.machineId, MessageType.Progress, progress));
-        }
-        if (elementsDone == numElements) {
-            System.out.println("Finished Computing everything");
-            for (int i = 0; i < Math.min(numElements, numElementsPrint); i++)
-                System.out.print(vectorB[i] + " ");
-            System.out.println("......");
-            Message msg = new Message(machineId, MessageType.FinishACK, 0);
-            try {
-                communicationThread.sendMessage(msg);
-            } catch (IOException ie) {
-                stop();
+        localJobsDone += 1;
+        if (processingDone) {
+            if (isLocal) {
+                double progress = (resultTransferred) * 10000.0;
+                progress = progress / (1.0 * finalRemoteJobs);
+                //dynamicBalancerUI.setProgress((int) progress);
+                dynamicBalancerUI.addMessage(new Message(MainThread.machineId, MessageType.ResultProgress, progress));
+            }
+        } else {
+            int total_elements_done = elementsDone + (remoteJobsDone * (job.getEndIndex() - job.getStartIndex() + 1));
+            if (isLocal) {
+                double progress = (total_elements_done) * 10000.0;
+                progress = progress / (1.0 * numElements);
+                //dynamicBalancerUI.setProgress((int) progress);
+                dynamicBalancerUI.addMessage(new Message(MainThread.machineId, MessageType.Progress, progress));
+            }
+            if (total_elements_done >= numElements) {
+                processingDone = true;
+                finalRemoteJobs = remoteJobsDone;
+                System.out.println("Finished Computing everything");
+                for (int i = 0; i < Math.min(numElements, numElementsPrint); i++)
+                    System.out.print(vectorB[i] + " ");
+                System.out.println("......");
+                Message msg = new Message(machineId, MessageType.FinishACK, 0);
+                try {
+                    communicationThread[0].sendMessage(msg);
+                } catch (IOException ie) {
+                    stop();
+                }
             }
         }
     }
@@ -143,7 +189,9 @@ public class MainThread {
         }
 
         try {
-            mySocket.close();
+            mySocket[0].close();
+            mySocket[1].close();
+            mySocket[2].close();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -162,27 +210,33 @@ public class MainThread {
         System.exit(0);
     }
 
-    public void connect(String ip, int port) throws IOException {
+    public void connect(String ip) throws IOException {
+        mySocket = new Socket[TRANSFER_TYPE.values().length];
         if (!isLocal) {
-            mySocket = new Socket(ip, port);
+            for (int i = 0; i < TRANSFER_TYPE.values().length; i++) {
+                mySocket[i] = new Socket(ip, port[i]);
+            }
         } else {
 
             InetAddress locIP = InetAddress.getByName(ip);
 
             System.out.println(Inet4Address.getLocalHost().getHostAddress());
+            serverSocket = new ServerSocket[TRANSFER_TYPE.values().length];
+            for (int i = 0; i < TRANSFER_TYPE.values().length; i++) {
+                serverSocket[i] = new ServerSocket(port[i], 0, locIP);
+                System.out.println("Listening on " + serverSocket[i]);
+            }
 
-            serverSocket = new ServerSocket(port, 0, locIP);
-
-            System.out.println("Listening on " + serverSocket);
-
-            mySocket = serverSocket.accept();
-
-            System.out.println("Connection from " + mySocket);
+            for (int i = 0; i < TRANSFER_TYPE.values().length; i++) {
+                mySocket[i] = serverSocket[i].accept();
+                System.out.println("Connection from " + mySocket[i]);
+            }
         }
 
-        communicationThread.setUpStreams();
-
-        communicationThread.start();
+        for (int i = 0; i < TRANSFER_TYPE.values().length; i++) {
+            communicationThread[i].setUpStreams();
+            communicationThread[i].start();
+        }
 
     }
 
@@ -219,21 +273,19 @@ public class MainThread {
         if (args.length >= 4)
             ip = args[3];
         if (args.length >= 5)
-            port = Integer.parseInt(args[4]);
+            MainThread.GUARD = Integer.parseInt(args[4]);
         if (args.length >= 6)
-            MainThread.GUARD = Integer.parseInt(args[5]);
-        if (args.length >= 7)
-            MainThread.transferFlag = Integer.parseInt(args[6]);
+            MainThread.transferFlag = Integer.parseInt(args[5]);
 
 
         MainThread mainThread = new MainThread();
 
         mainThread.timePerJobCalc();
-        System.out.println("TIME PER JOB ON MACHINE ID #"+ MainThread.machineId + " IS (in ms) :" + MainThread.timePerJob);
+        System.out.println("TIME PER JOB ON MACHINE ID #" + MainThread.machineId + " IS (in ms) :" + MainThread.timePerJob);
         
-        mainThread.connect(ip, port);
+        mainThread.connect(ip);
 
-        communicationThread.sendMessage("Got connection from " + port);
+        communicationThread[0].sendMessage("Got connection from " + port);
 
         mainThread.start();
     }

@@ -11,10 +11,12 @@ public enum MessageType {
     JOBFOOTER,
     JOBTRANSFERACK,
     JOBRESULT,
+    BULKJOBRESULT,
     SM,
     FinishACK,
     OkACK,
     TVALUE,
     Progress,
+    ResultProgress,
     UITVALUE
 }

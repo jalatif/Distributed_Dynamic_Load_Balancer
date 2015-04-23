@@ -71,11 +71,13 @@ public class WorkerThread extends Thread {
         notify();
 
         System.out.println("Worker thread " + index + " woke");
+        System.out.println("Var = " + MainThread.jobsInQueue + " " + MainThread.jobsInComing);
         setUpSleepTimer();
     }
 
     private synchronized void sleepWorker() {
         System.out.println("Worker thread " + index + " sleep");
+        System.out.println("Var = " + MainThread.jobsInQueue + " " + MainThread.jobsInComing);
         threadSuspended = true;
         setUpWorkTimer();
     }
@@ -140,8 +142,9 @@ public class WorkerThread extends Thread {
             MainThread.addToResult(resultJob);
         } else {
             //System.out.println("Worker thread " + index + " sending message");
-            //Message msg = new Message(MainThread.machineId, MessageType.JOBRESULT, resultJob);
-            //MainThread.transferManagerThread.addMessage(msg);
+//            Message msg = new Message(MainThread.machineId, MessageType.JOBRESULT, resultJob);
+//            MainThread.transferManagerThread.addMessage(msg);
+            MainThread.resultantJobQueue.add(resultJob);
         }
         currentJob = null;
     }
@@ -155,7 +158,7 @@ public class WorkerThread extends Thread {
 
     @Override
     public void run() {
-        while (!MainThread.STOP_SIGNAL) {
+        while (!MainThread.STOP_SIGNAL && !MainThread.processingDone) {
             try {
                 doWork();
                 if (threadSuspended) {

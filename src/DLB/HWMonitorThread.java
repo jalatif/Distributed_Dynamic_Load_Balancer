@@ -65,7 +65,13 @@ public class HWMonitorThread extends Thread {
 
     protected StateInfo getCurrentState() throws SigarException, InterruptedException {
 //        return new StateInfo(MainThread.jobQueue.size(), getCpuUsage(), getNwUsage(), getTimePerJob(), getThrottlingValue() );
-        return new StateInfo(MainThread.jobQueue.size(), getCpuUsage(), 0.0, getTimePerJob(), getThrottlingValue() );
+        if (MainThread.isLocal)
+            return new StateInfo(MainThread.jobQueue.size(), MainThread.localJobsDone, MainThread.jobsInQueue,
+                    MainThread.jobsInComing, getCpuUsage(), 0.0, getTimePerJob(), getThrottlingValue() );
+        else
+            return new StateInfo(MainThread.jobQueue.size(), MainThread.resultantJobQueue.size(),
+                    MainThread.jobsInQueue, MainThread.jobsInComing, getCpuUsage(), 0.0, getTimePerJob(),
+                    getThrottlingValue() );
     }
 
     private void doMonitoring() throws IOException, SigarException, InterruptedException {
@@ -85,7 +91,7 @@ public class HWMonitorThread extends Thread {
 
     @Override
     public void run() {
-        while (!MainThread.STOP_SIGNAL) {
+        while (!MainThread.STOP_SIGNAL && !MainThread.processingDone) {
             try {
                 doMonitoring();
                 sleep(MainThread.collectionRate);
@@ -94,7 +100,7 @@ public class HWMonitorThread extends Thread {
             } catch (IOException ie) {
                 ie.printStackTrace();
                 System.out.println("Cannot continue w/o connection");
-                MainThread.stop();
+                //MainThread.stop();
             } catch (SigarException e) {
                 e.printStackTrace();
             }

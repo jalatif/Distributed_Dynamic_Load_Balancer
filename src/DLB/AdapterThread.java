@@ -47,6 +47,7 @@ public class AdapterThread extends Thread {
         System.out.println("TRASFER FLAG :" + transferFlag);
         System.out.println("SLOCAL IS :" + sLocal);
         System.out.println("SREMOTE IS :" + sRemote);
+        transferFlag = 0;
         switch (transferFlag) {
             case 0: // case when only queue length is considered.
                 if ((sLocal.getQueueLength() - sRemote.getQueueLength()) > MainThread.queueDifferenceThreshold) {
@@ -95,6 +96,7 @@ public class AdapterThread extends Thread {
         StateInfo sLocal = MainThread.hwMonitorThread.getCurrentState();
 
         if (MainThread.isLocal) {
+            MainThread.setRemoteJobsDone(sRemote.getNumJobsDone());
             MainThread.dynamicBalancerUI.addMessage(new Message(incomingMsg.getMachineId(), MessageType.SM, sRemote));
             MainThread.dynamicBalancerUI.addMessage(new Message(MainThread.machineId, MessageType.SM, sLocal));
         }

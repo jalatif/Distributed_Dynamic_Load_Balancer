@@ -33,7 +33,7 @@ public class TransferManagerThread extends Thread {
         System.out.println("Sending " + queueToSend + " jobs to other node ");
 
         Message message = new Message(MainThread.machineId, MessageType.JOBHEADER, queueToSend);
-        MainThread.communicationThread.sendMessage(message);
+        MainThread.communicationThread[MainThread.TRANSFER_TYPE.DATA.ordinal()].sendMessage(message);
 
         //StringBuilder stringBuilder = new StringBuilder();
         List<Job> jobsToSend = new LinkedList<Job>();
@@ -54,7 +54,7 @@ public class TransferManagerThread extends Thread {
 
         System.out.println("Sending message to other node");
         message = new Message(MainThread.machineId, MessageType.BULKJOBTRANSFER, jobsToSend);
-        MainThread.communicationThread.sendMessage(message);
+        MainThread.communicationThread[MainThread.TRANSFER_TYPE.DATA.ordinal()].sendMessage(message);
         System.out.println("Message sent");
     }
 
@@ -65,7 +65,7 @@ public class TransferManagerThread extends Thread {
 
 
         Message message = new Message(MainThread.machineId, MessageType.JOBHEADER, queueToSend);
-        MainThread.communicationThread.sendMessage(message);
+        MainThread.communicationThread[MainThread.TRANSFER_TYPE.DATA.ordinal()].sendMessage(message);
 
         for (int i = 0; i < queueToSend; i++) {
             //stringBuilder.append(MainThread.jobQueue.pollFirst()).append("|");
@@ -80,19 +80,39 @@ public class TransferManagerThread extends Thread {
                 break;
             }
             message = new Message(MainThread.machineId, MessageType.JOBTRANSFER, job);
-            MainThread.communicationThread.sendMessage(message);
+            MainThread.communicationThread[MainThread.TRANSFER_TYPE.DATA.ordinal()].sendMessage(message);
         }
         message = new Message(MainThread.machineId, MessageType.JOBFOOTER, queueToSend);
-        MainThread.communicationThread.sendMessage(message);
+        MainThread.communicationThread[MainThread.TRANSFER_TYPE.DATA.ordinal()].sendMessage(message);
 
         System.out.println("Message sent");
     }
 
 
-    private void sendResults(Message incomingMsg) throws IOException {
+    private void sendResult(Message incomingMsg) throws IOException {
         System.out.println("Sending resultant job back to the local Node");
-        MainThread.communicationThread.sendMessage(incomingMsg);
+        MainThread.communicationThread[MainThread.TRANSFER_TYPE.RESULT.ordinal()].sendMessage(incomingMsg);
         System.out.println("Message sent");
+    }
+
+    private void sendResults() throws IOException {
+        int num_elements = MainThread.resultantJobQueue.size();
+        System.out.println("Sending all results back to local node");
+        for (int i = 0; i < num_elements; i++) {
+            Job job = MainThread.resultantJobQueue.poll();
+            if (job == null) {
+                System.out.println("Not sufficient amount of result jobs to send back");
+                break;
+            }
+            Message msg = new Message(MainThread.machineId, MessageType.JOBRESULT, job);
+            addMessage(msg);
+        }
+        Message okMsg = new Message(MainThread.machineId, MessageType.OkACK, 0);
+        addMessage(okMsg);
+        Message msg = new Message(MainThread.machineId, MessageType.FinishACK, 0);
+        addMessage(msg);
+        System.out.println("OkAck message sent");
+        MainThread.stop();
     }
 
     private void transferWork() throws IOException, InterruptedException {
@@ -117,19 +137,22 @@ public class TransferManagerThread extends Thread {
                 sendRequiredJob(incomingMsg);
                 break;
             case JOBTRANSFERACK:
-                MainThread.communicationThread.sendMessage(incomingMsg);
+                MainThread.communicationThread[MainThread.TRANSFER_TYPE.DATA.ordinal()].sendMessage(incomingMsg);
                 break;
             case JOBRESULT:
-                sendResults(incomingMsg);
+                sendResult(incomingMsg);
+                break;
+            case BULKJOBRESULT:
+                sendResults();
                 break;
             case TVALUE:
-                MainThread.communicationThread.sendMessage(incomingMsg);
+                MainThread.communicationThread[MainThread.TRANSFER_TYPE.STATE.ordinal()].sendMessage(incomingMsg);
                 break;
             case UITVALUE:
-                MainThread.communicationThread.sendMessage(incomingMsg);
+                MainThread.communicationThread[MainThread.TRANSFER_TYPE.STATE.ordinal()].sendMessage(incomingMsg);
                 break;
             default:
-                MainThread.communicationThread.sendMessage(incomingMsg);
+                MainThread.communicationThread[MainThread.TRANSFER_TYPE.DATA.ordinal()].sendMessage(incomingMsg);
                 break;
         }
     }
@@ -159,7 +182,7 @@ public class TransferManagerThread extends Thread {
         }
         System.out.println("Now jobs are " + MainThread.jobQueue.size());
         Message message = new Message(MainThread.machineId, MessageType.JOBTRANSFERACK, 0);
-        MainThread.communicationThread.sendMessage(message);
+        MainThread.communicationThread[MainThread.TRANSFER_TYPE.DATA.ordinal()].sendMessage(message);
 
     }
 
@@ -185,5 +208,4 @@ public class TransferManagerThread extends Thread {
             }
         }
     }
-
 }

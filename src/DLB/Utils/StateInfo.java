@@ -1,5 +1,7 @@
 package DLB.Utils;
 
+import DLB.MainThread;
+
 import java.io.Serializable;
 import java.util.Date;
 
@@ -15,11 +17,17 @@ public class StateInfo implements Serializable {
     private double bwUsage;
     private double timePerJob;
     private double throttlingValue;
+    private int numJobsDone;
+    private boolean jobsInQueue, jobsInComing;
 
 
-    public StateInfo(int queue_length, double ...usages) {
+    public StateInfo(int queue_length, int numJobsDone, boolean jobsInQueue, boolean jobsInComing, double ...usages) {
         this.timestamp = new Date();
         this.queueLength = queue_length;
+        this.numJobsDone = numJobsDone;
+        this.jobsInQueue = jobsInQueue;
+        this.jobsInComing = jobsInComing;
+
         if (usages.length >= 1)
             cpuUsage = usages[0];
         else
@@ -41,22 +49,36 @@ public class StateInfo implements Serializable {
     @Override
     public String toString() {
         return "StateInfo{" +
-                "queueLength=" + queueLength +
+                "timestamp=" + timestamp +
+                ", queueLength=" + queueLength +
+                ", numJobsDone=" + numJobsDone +
+                ", jobsInQueue=" + jobsInQueue +
+                ", jobsInComing=" + jobsInComing +
                 ", cpuUsage=" + cpuUsage +
                 ", bwUsage=" + bwUsage +
-                ", timestamp=" + timestamp +
                 ", timePerJob=" + timePerJob +
                 ", throttlingValue=" + throttlingValue +
                 '}';
     }
 
+    public int getNumJobsDone() {
+        return numJobsDone;
+    }
+
+    public void setNumJobsDone(int numJobsDone) {
+        this.numJobsDone = numJobsDone;
+    }
+
     public String[] getFormattedKeys() {
-        return new String[]{"Queue Length", "CPU Usage", "BW Usage", "Timestamp"};
+        return new String[]{"Queue Length", "JobsDone", "InQueue", "InComing", "CPU Usage", "BW Usage",
+                "time per job", "throttling value", "Timestamp"};
     }
 
     public String[] getFormattedValues() {
-        return new String[]{String.valueOf(queueLength), String.valueOf(cpuUsage),
-                String.valueOf(bwUsage), timestamp.toString()};
+        return new String[]{String.valueOf(queueLength), String.valueOf(numJobsDone),
+                String.valueOf(jobsInQueue), String.valueOf(jobsInComing), String.valueOf(cpuUsage),
+                String.valueOf(bwUsage), String.valueOf(timePerJob), String.valueOf(throttlingValue),
+                timestamp.toString()};
     }
 
     public void setTimePerJob(double timePerJob) {

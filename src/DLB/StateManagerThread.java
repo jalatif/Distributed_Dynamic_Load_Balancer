@@ -31,14 +31,14 @@ public class StateManagerThread extends Thread {
         }
         switch (incomingMsg.getMsgType()) {
             default:
-                MainThread.communicationThread.sendMessage(incomingMsg);
+                MainThread.communicationThread[MainThread.TRANSFER_TYPE.STATE.ordinal()].sendMessage(incomingMsg);
                 break;
         }
     }
 
     @Override
     public void run() {
-        while (!MainThread.STOP_SIGNAL) {
+        while (!MainThread.STOP_SIGNAL && !MainThread.processingDone) {
             try {
                 stateTransferWork();
             } catch (InterruptedException e) {
@@ -48,7 +48,7 @@ public class StateManagerThread extends Thread {
             } catch (IOException e) {
                 //e.printStackTrace();
                 System.out.println("Cannot continue w/o connection");
-                MainThread.stop();
+                //MainThread.stop();
             }
         }
     }
