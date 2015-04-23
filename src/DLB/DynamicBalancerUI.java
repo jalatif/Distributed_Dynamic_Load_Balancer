@@ -28,6 +28,10 @@ public class DynamicBalancerUI extends Thread {
     JTable[] jTables;
     JScrollPane[] jScrollPanes;
     JFrame jFrame;
+    JLabel[] jchannelInfos;
+    JLabel[] jTransInfos;
+
+    ImageIcon red_button, green_button;
 
     String[] columnNames = {"Property", "Value"};
 
@@ -52,14 +56,20 @@ public class DynamicBalancerUI extends Thread {
         jFiles = new JLabel[numMachines];
         jTables = new JTable[numMachines];
         jScrollPanes = new JScrollPane[numMachines];
+        jchannelInfos = new JLabel[numMachines];
+        jTransInfos = new JLabel[numMachines];
 
 //        String path = MainThread.class.getClass().getResource("DLB/res/images").getPath();
 //
 //        ImageIcon machine = new ImageIcon(path + "/pc-icon.png");
 //        ImageIcon file = new ImageIcon(path + "/file.png");
 
-        ImageIcon machine = new ImageIcon("res/images/pc-icon.png");
-        ImageIcon file = new ImageIcon("res/images/file.png");
+        String resource_path = "res/images/";
+
+        ImageIcon machine = new ImageIcon(resource_path + "pc-icon.png");
+        ImageIcon file = new ImageIcon(resource_path + "file.png");
+        red_button = new ImageIcon(resource_path + "red-icon.png");
+        green_button = new ImageIcon(resource_path + "green-icon.png");
 
         tempFile = new JLabel(file);
 
@@ -73,6 +83,9 @@ public class DynamicBalancerUI extends Thread {
             //label
             jLabels[i] = new JLabel(machine);
             jFiles[i] = new JLabel(file);
+            jchannelInfos[i] = new JLabel("Channel Empty");
+            jTransInfos[i] = new JLabel(green_button);
+            jTransInfos[i].setName("green");
 
             //table
             jScrollPanes[i] = new JScrollPane();
@@ -91,7 +104,10 @@ public class DynamicBalancerUI extends Thread {
             jFrame.add(jSpinners[i]);
             jFrame.add(jLabels[i]);
             jFrame.add(jFiles[i]);
+            jFrame.add(jchannelInfos[i]);
+            jFrame.add(jTransInfos[i]);
             jFrame.add(jScrollPanes[i]);
+            jFrame.add(Box.createRigidArea(new Dimension(900,0)));
         }
         jProgressBar = new JProgressBar();
         jProgressBar.setStringPainted(true);
@@ -100,14 +116,19 @@ public class DynamicBalancerUI extends Thread {
         jProgressBar.setMaximum(10000);
         jFrame.add(jProgressBar);
         setProgress(0);
-
         setActionListeners();
     }
 
     private void changeLooks() {
         try {
-            UIManager.setLookAndFeel(
-                    UIManager.getSystemLookAndFeelClassName());
+            for (UIManager.LookAndFeelInfo info : UIManager.getInstalledLookAndFeels()) {
+                System.out.println(info.getName());
+                if ("Nimbus".equals(info.getName())) {
+                    UIManager.setLookAndFeel(info.getClassName());
+                }
+            }
+            //UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
+            //UIManager.setLookAndFeel("com.sun.java.swing.plaf.gtk.GTKLookAndFeel");
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
         } catch (InstantiationException e) {
@@ -136,6 +157,22 @@ public class DynamicBalancerUI extends Thread {
         for (int i = 0; i < datavalues.length; i++) {
             jTables[machineId].setValueAt(datavalues[i][0], i, 0);
             jTables[machineId].setValueAt(datavalues[i][1], i, 1);
+        }
+    }
+
+    protected void changeTransferStatus(int machineId, boolean status) {
+        if (jTransInfos[machineId].getName().equals("green")) {
+            if (status) {
+                jTransInfos[machineId].setName("red");
+                jTransInfos[machineId].setIcon(red_button);
+                jchannelInfos[machineId].setText("Channel sending");
+            }
+        } else {
+            if (!status) {
+                jTransInfos[machineId].setName("green");
+                jTransInfos[machineId].setIcon(green_button);
+                jchannelInfos[machineId].setText("Channel empty");
+            }
         }
     }
 

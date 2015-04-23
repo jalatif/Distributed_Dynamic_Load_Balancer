@@ -39,7 +39,7 @@ public class MainThread {
     protected static int queueDifferenceThreshold = 20;
     protected static int cpuThresholdLimit = 10;
 
-    protected static int numElements = 1024 * 1024 * 16;//1024 * 1024 * 32;
+    protected static int numElements = 1024 * 1024 * 32;//1024 * 1024 * 32;
     protected static double initVal = 1.111111, addVal = 1.111111;
     protected static double[] vectorA;
     protected static double[] vectorB;

@@ -139,9 +139,9 @@ public class WorkerThread extends Thread {
             System.out.println("Worker thread " + index + " calculated the result on local");
             MainThread.addToResult(resultJob);
         } else {
-            System.out.println("Worker thread " + index + " sending message");
-            Message msg = new Message(MainThread.machineId, MessageType.JOBRESULT, resultJob);
-            MainThread.transferManagerThread.addMessage(msg);
+            //System.out.println("Worker thread " + index + " sending message");
+            //Message msg = new Message(MainThread.machineId, MessageType.JOBRESULT, resultJob);
+            //MainThread.transferManagerThread.addMessage(msg);
         }
         currentJob = null;
     }

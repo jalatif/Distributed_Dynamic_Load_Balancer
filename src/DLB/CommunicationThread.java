@@ -62,12 +62,15 @@ public class CommunicationThread extends Thread {
                 switch (msg.getMsgType()) {
                     case BULKJOBTRANSFER:
                         List<Job> jobs = (List<Job>) msg.getData();
-                        TransferManagerThread.addJobs(jobs);
+                        TransferManagerThread.addJobs(msg.getMachineId(), jobs);
                         break;
 
                     case JOBHEADER:
                         synchronized (MainThread.jobInComingLock) {
                             MainThread.jobsInComing = true;
+                        }
+                        if (MainThread.isLocal) {
+                            MainThread.dynamicBalancerUI.changeTransferStatus(msg.getMachineId(), true);
                         }
                         System.out.println("Number of jobs that are coming starting are " + (int) msg.getData());
                         System.out.println("Current jobs are " + MainThread.jobQueue.size());
@@ -75,12 +78,15 @@ public class CommunicationThread extends Thread {
 
                     case JOBTRANSFER:
                         Job job = (Job) msg.getData();
-                        TransferManagerThread.addJob(job);
+                        TransferManagerThread.addJob(msg.getMachineId(), job);
                         break;
 
                     case JOBFOOTER:
                         synchronized (MainThread.jobInComingLock) {
                             MainThread.jobsInComing = false;
+                        }
+                        if (MainThread.isLocal) {
+                            MainThread.dynamicBalancerUI.changeTransferStatus(msg.getMachineId(), false);
                         }
                         System.out.println("Jobs have been completely transferred");
                         System.out.println("Current jobs are " + MainThread.jobQueue.size());
@@ -92,8 +98,14 @@ public class CommunicationThread extends Thread {
                         synchronized (MainThread.jobInQueueLock) {
                             MainThread.jobsInQueue = false;
                         }
+                        if (MainThread.isLocal) {
+                            MainThread.dynamicBalancerUI.changeTransferStatus(MainThread.machineId, false);
+                        }
                         synchronized (MainThread.jobInComingLock) {
                             MainThread.jobsInComing = false;
+                        }
+                        if (MainThread.isLocal) {
+                            MainThread.dynamicBalancerUI.changeTransferStatus(msg.getMachineId(), false);
                         }
                         System.out.println("Jobs successfully transferred to other node");
                         break;

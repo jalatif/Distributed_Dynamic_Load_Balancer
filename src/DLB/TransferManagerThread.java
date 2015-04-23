@@ -102,11 +102,17 @@ public class TransferManagerThread extends Thread {
                 synchronized (MainThread.jobInQueueLock) {
                     MainThread.jobsInQueue = true;
                 }
+                if (MainThread.isLocal) {
+                    MainThread.dynamicBalancerUI.changeTransferStatus(MainThread.machineId, true);
+                }
                 sendRequiredJobs(incomingMsg);
                 break;
             case JOBTRANSFER:
                 synchronized (MainThread.jobInQueueLock) {
                     MainThread.jobsInQueue = true;
+                }
+                if (MainThread.isLocal) {
+                    MainThread.dynamicBalancerUI.changeTransferStatus(MainThread.machineId, true);
                 }
                 sendRequiredJob(incomingMsg);
                 break;
@@ -128,7 +134,7 @@ public class TransferManagerThread extends Thread {
         }
     }
 
-    public static void addJobs(List<Job> jobs) throws IOException {
+    public static void addJobs(int machineId, List<Job> jobs) throws IOException {
         //System.out.println("There are some incoming Jobs to my node "); // ca
         //System.out.println("Current jobs are " + MainThread.jobQueue.size());
         for (Job job : jobs) {
@@ -148,13 +154,16 @@ public class TransferManagerThread extends Thread {
         synchronized (MainThread.jobInComingLock) {
             MainThread.jobsInComing = false;
         }
+        if (MainThread.isLocal) {
+            MainThread.dynamicBalancerUI.changeTransferStatus(machineId, false);
+        }
         System.out.println("Now jobs are " + MainThread.jobQueue.size());
         Message message = new Message(MainThread.machineId, MessageType.JOBTRANSFERACK, 0);
         MainThread.communicationThread.sendMessage(message);
 
     }
 
-    public static synchronized void addJob(Job job) {
+    public static synchronized void addJob(int machineId, Job job) {
         MainThread.jobQueue.addFirst(job);
         //System.out.println("Job Data ----->");
         //System.out.println(job.getStartIndex() + " " + job.getEndIndex());

@@ -169,6 +169,9 @@ public class AdapterThread extends Thread {
         synchronized (MainThread.jobInQueueLock) {
             MainThread.jobsInQueue = true;
         }
+        if (MainThread.isLocal) {
+            MainThread.dynamicBalancerUI.changeTransferStatus(MainThread.machineId, true);
+        }
     }
 
     private void startWorkersAndMonitors() {
