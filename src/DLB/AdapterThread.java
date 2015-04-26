@@ -41,13 +41,14 @@ public class AdapterThread extends Thread {
         for (int i = 0; i < workerThreads.length; i++) {
             workerThreads[i].changeThrottleValue(throttlingValue);
         }
+        MainThread.throttlingValue = tValue;
     }
 
     private void workTransferCalc(StateInfo sRemote, StateInfo sLocal, int transferFlag) {
         System.out.println("TRASFER FLAG :" + transferFlag);
         System.out.println("SLOCAL IS :" + sLocal);
         System.out.println("SREMOTE IS :" + sRemote);
-        transferFlag = 0;
+        //transferFlag = 0;
         switch (transferFlag) {
             case 0: // case when only queue length is considered.
                 if ((sLocal.getQueueLength() - sRemote.getQueueLength()) > MainThread.queueDifferenceThreshold) {
@@ -55,6 +56,7 @@ public class AdapterThread extends Thread {
                     Message msg = new Message(MainThread.machineId, MessageType.JOBTRANSFER, jobsToSend);
                     System.out.println("Matching expected time to finish by sending " + jobsToSend + " number of jobs");
                     MainThread.transferManagerThread.addMessage(msg);
+                    MainThread.balanceTransferred++;
                 }
             break;
 
@@ -78,6 +80,7 @@ public class AdapterThread extends Thread {
                     Message msg = new Message(MainThread.machineId, MessageType.JOBTRANSFER, jobsToSend);
                     System.out.println("Matching expected time to finish by sending " + jobsToSend + " number of jobs");
                     MainThread.transferManagerThread.addMessage(msg);
+                    MainThread.balanceTransferred++;
                 }
                 break;
         }

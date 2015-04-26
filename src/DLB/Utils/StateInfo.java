@@ -18,16 +18,17 @@ public class StateInfo implements Serializable {
     private double timePerJob;
     private double throttlingValue;
     private int numJobsDone;
+    private int balanceTransferred;
     private boolean jobsInQueue, jobsInComing;
 
 
-    public StateInfo(int queue_length, int numJobsDone, boolean jobsInQueue, boolean jobsInComing, double ...usages) {
+    public StateInfo(int queue_length, int numJobsDone, boolean jobsInQueue, boolean jobsInComing, int numTransferred, double ...usages) {
         this.timestamp = new Date();
         this.queueLength = queue_length;
         this.numJobsDone = numJobsDone;
         this.jobsInQueue = jobsInQueue;
         this.jobsInComing = jobsInComing;
-
+        this.balanceTransferred = numTransferred;
         if (usages.length >= 1)
             cpuUsage = usages[0];
         else
@@ -52,6 +53,7 @@ public class StateInfo implements Serializable {
                 "timestamp=" + timestamp +
                 ", queueLength=" + queueLength +
                 ", numJobsDone=" + numJobsDone +
+                ", balanceTransferred=" + balanceTransferred +
                 ", jobsInQueue=" + jobsInQueue +
                 ", jobsInComing=" + jobsInComing +
                 ", cpuUsage=" + cpuUsage +
@@ -59,6 +61,30 @@ public class StateInfo implements Serializable {
                 ", timePerJob=" + timePerJob +
                 ", throttlingValue=" + throttlingValue +
                 '}';
+    }
+
+    public int getBalanceTransferred() {
+        return balanceTransferred;
+    }
+
+    public void setBalanceTransferred(int balanceTransferred) {
+        this.balanceTransferred = balanceTransferred;
+    }
+
+    public boolean isJobsInQueue() {
+        return jobsInQueue;
+    }
+
+    public void setJobsInQueue(boolean jobsInQueue) {
+        this.jobsInQueue = jobsInQueue;
+    }
+
+    public boolean isJobsInComing() {
+        return jobsInComing;
+    }
+
+    public void setJobsInComing(boolean jobsInComing) {
+        this.jobsInComing = jobsInComing;
     }
 
     public int getNumJobsDone() {
@@ -70,15 +96,15 @@ public class StateInfo implements Serializable {
     }
 
     public String[] getFormattedKeys() {
-        return new String[]{"Queue Length", "JobsDone", "InQueue", "InComing", "CPU Usage", "BW Usage",
+        return new String[]{"Queue Length", "JobsDone", "InQueue", "InComing", "Jobs Transferred", "CPU Usage", "BW Usage",
                 "time per job", "throttling value", "Timestamp"};
     }
 
     public String[] getFormattedValues() {
         return new String[]{String.valueOf(queueLength), String.valueOf(numJobsDone),
-                String.valueOf(jobsInQueue), String.valueOf(jobsInComing), String.valueOf(cpuUsage),
-                String.valueOf(bwUsage), String.valueOf(timePerJob), String.valueOf(throttlingValue),
-                timestamp.toString()};
+                String.valueOf(jobsInQueue), String.valueOf(jobsInComing), String.valueOf(balanceTransferred),
+                String.valueOf(cpuUsage), String.valueOf(bwUsage), String.valueOf(timePerJob),
+                String.valueOf(throttlingValue), timestamp.toString()};
     }
 
     public void setTimePerJob(double timePerJob) {

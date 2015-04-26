@@ -126,7 +126,7 @@ public class CommunicationThread extends Thread {
                         break;
                     case OkACK:
                         System.out.println("Got Ok ack");
-                        MainThread.stop();
+                        //MainThread.stop();
                         break;
                     case HW:
                         System.out.println("Got HW State");
@@ -168,11 +168,11 @@ public class CommunicationThread extends Thread {
             try {
                 receiveMessage();
             } catch (IOException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
                 System.out.println("Cannot continue w/o connection");
                 MainThread.stop();
             } catch (ClassNotFoundException e) {
-                e.printStackTrace();
+                //e.printStackTrace();
                 System.out.println("Cannot continue w/o connection");
                 MainThread.stop();
             }
@@ -181,7 +181,7 @@ public class CommunicationThread extends Thread {
             dout.close();
             din.close();
         } catch (IOException e) {
-            e.printStackTrace();
+            //e.printStackTrace();
         }
     }
 }

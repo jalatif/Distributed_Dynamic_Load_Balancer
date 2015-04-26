@@ -42,7 +42,9 @@ public class WorkerThread extends Thread {
         //long t1 = System.currentTimeMillis();
         Double[] data = job.getData();
         for (int i = 0; i < data.length; i++) {
-            data[i] = data[i] + MainThread.addVal;
+            for (int j = 0; j < 100; j++) {
+                data[i] = data[i] + MainThread.addVal;
+            }
         }
 //        long t2 = System.currentTimeMillis();
 //        if ((long) timePerJob == 0){

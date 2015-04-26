@@ -32,14 +32,15 @@ public class MainThread {
     protected static int numJobs = 2048;
     protected static int numWorkerThreads = 1;
 
-    protected static int utilizationFactor = 100;
+    protected static int utilizationFactor = 1000;
     protected static int numElementsPrint = 10;
-    protected static int collectionRate = 5; // in ms
+    protected static int collectionRate = 10; // in ms
 
-    protected static int queueDifferenceThreshold = 20;
+    protected static int queueDifferenceThreshold = 5;
     protected static int cpuThresholdLimit = 10;
 
-    protected static int numElements = 1024 * 1024 * 32;//1024 * 1024 * 32;
+    protected static int numElements = 1024 * 1024;//1024 * 1024 * 32;
+    protected static int elementsPerJob = (numElements / numJobs);
 
     protected static double initVal = 1.111111, addVal = 1.111111;
     protected static double[] vectorA;
@@ -71,10 +72,11 @@ public class MainThread {
     protected static boolean processingDone;
     protected static int resultTransferred;
     protected static int finalRemoteJobs;
+    protected static int balanceTransferred;
 
     protected static double throttlingValue = 0.01;
     protected static boolean isLocal = !true;
-    protected static String ip = "172.17.116.149";//"jalatif2.ddns.net"; //"localhost";
+    protected static String ip = "localhost";//"172.17.116.149";//"jalatif2.ddns.net"; //"localhost";
     protected static int[] port = {2211, 2212, 2213};
     protected static enum TRANSFER_TYPE {
         DATA,
@@ -116,6 +118,7 @@ public class MainThread {
         STOP_SIGNAL = false;
         processingDone = false;
         finalRemoteJobs = 0;
+        balanceTransferred = 0;
 
         if (!isLocal) machineId = 1;
 
@@ -146,17 +149,25 @@ public class MainThread {
         for (int i = job.getStartIndex(); i < job.getEndIndex(); i++) {
             vectorB[i] = data[i - job.getStartIndex()];
         }
-        elementsDone += data.length;
-        localJobsDone += 1;
+        if (processingDone) {
+            resultTransferred += 1;
+        } else {
+            elementsDone += data.length;
+            localJobsDone += 1;
+        }
         if (processingDone) {
             if (isLocal) {
-                double progress = (resultTransferred) * 10000.0;
+                double progress = (resultTransferred) * 100.0;
                 progress = progress / (1.0 * finalRemoteJobs);
                 //dynamicBalancerUI.setProgress((int) progress);
                 dynamicBalancerUI.addMessage(new Message(MainThread.machineId, MessageType.ResultProgress, progress));
+
+                if (resultTransferred == finalRemoteJobs) {
+                    MainThread.stop();
+                }
             }
         } else {
-            int total_elements_done = elementsDone + (remoteJobsDone * (job.getEndIndex() - job.getStartIndex() + 1));
+            int total_elements_done = elementsDone + (remoteJobsDone * elementsPerJob);
             if (isLocal) {
                 double progress = (total_elements_done) * 10000.0;
                 progress = progress / (1.0 * numElements);
@@ -199,7 +210,7 @@ public class MainThread {
         if (isLocal) {
             System.out.println("Wait testing the output");
             for (int i = 0; i < vectorB.length; i++) {
-                if (vectorB[i] != (vectorA[i] + addVal)) {
+                if (vectorB[i] != (vectorA[i] + 1000 * addVal)) {
                     System.out.println("Resultant Output incorrect at " + i + " index with value = " + vectorB[i]);
                     System.exit(1);
                 }
@@ -248,7 +259,9 @@ public class MainThread {
             double[] data = new double[elementsPerJob];
             Arrays.fill(data, MainThread.initVal);
             for (int j = 0; j < elementsPerJob; j++) { // a job unit
-                data[j] = data[j] + MainThread.addVal;
+                for (int k = 0; k < 1000; k++) {
+                    data[j] = data[j] + MainThread.addVal;
+                }
             }
             long t2 = System.currentTimeMillis();
             timeTotal += (t2 - t1);

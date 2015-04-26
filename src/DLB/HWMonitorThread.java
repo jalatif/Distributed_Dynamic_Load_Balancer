@@ -67,10 +67,10 @@ public class HWMonitorThread extends Thread {
 //        return new StateInfo(MainThread.jobQueue.size(), getCpuUsage(), getNwUsage(), getTimePerJob(), getThrottlingValue() );
         if (MainThread.isLocal)
             return new StateInfo(MainThread.jobQueue.size(), MainThread.localJobsDone, MainThread.jobsInQueue,
-                    MainThread.jobsInComing, getCpuUsage(), 0.0, getTimePerJob(), getThrottlingValue() );
+                    MainThread.jobsInComing, MainThread.balanceTransferred, getCpuUsage(), 0.0, getTimePerJob(), getThrottlingValue() );
         else
             return new StateInfo(MainThread.jobQueue.size(), MainThread.resultantJobQueue.size(),
-                    MainThread.jobsInQueue, MainThread.jobsInComing, getCpuUsage(), 0.0, getTimePerJob(),
+                    MainThread.jobsInQueue, MainThread.jobsInComing, MainThread.balanceTransferred, getCpuUsage(), 0.0, getTimePerJob(),
                     getThrottlingValue() );
     }
 

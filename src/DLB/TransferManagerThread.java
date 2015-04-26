@@ -109,10 +109,9 @@ public class TransferManagerThread extends Thread {
         }
         Message okMsg = new Message(MainThread.machineId, MessageType.OkACK, 0);
         addMessage(okMsg);
-        Message msg = new Message(MainThread.machineId, MessageType.FinishACK, 0);
-        addMessage(msg);
+//        Message msg = new Message(MainThread.machineId, MessageType.FinishACK, 0);
+//        addMessage(msg);
         System.out.println("OkAck message sent");
-        MainThread.stop();
     }
 
     private void transferWork() throws IOException, InterruptedException {
@@ -150,6 +149,9 @@ public class TransferManagerThread extends Thread {
                 break;
             case UITVALUE:
                 MainThread.communicationThread[MainThread.TRANSFER_TYPE.STATE.ordinal()].sendMessage(incomingMsg);
+                break;
+            case OkACK:
+                MainThread.communicationThread[MainThread.TRANSFER_TYPE.DATA.ordinal()].sendMessage(incomingMsg);
                 break;
             default:
                 MainThread.communicationThread[MainThread.TRANSFER_TYPE.DATA.ordinal()].sendMessage(incomingMsg);

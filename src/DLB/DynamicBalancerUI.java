@@ -9,6 +9,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.concurrent.TimeUnit;
 
 /**
  * Created by manshu on 4/21/15.
@@ -90,7 +91,7 @@ public class DynamicBalancerUI extends Thread {
 
             //table
             jScrollPanes[i] = new JScrollPane();
-            jTables[i] = new JTable(getStateData(new StateInfo(0, 0, false, false)), columnNames);
+            jTables[i] = new JTable(getStateData(new StateInfo(0, 0, false, false, 0)), columnNames);
             //jTables[i].setMinimumSize(new Dimension(200, 200));
             jTables[i].setRowHeight(50);
             jTables[i].setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
@@ -235,7 +236,6 @@ public class DynamicBalancerUI extends Thread {
                 public void stateChanged(ChangeEvent e) {
                     JSpinner jSpinner = (JSpinner) e.getSource();
                     changeThrottleValue(Integer.parseInt(jSpinner.getName()), (double) jSpinner.getValue());
-                    //setProgress(jProgressBar.getValue() + 10);
                 }
             });
         }
@@ -245,27 +245,28 @@ public class DynamicBalancerUI extends Thread {
         int x = jFiles[machineId].getLocation().x, y = jFiles[machineId].getLocation().y;
         int finalX = jFiles[(machineId + 1)%numMachines].getLocation().x, finalY = jFiles[(machineId + 1)%numMachines].getLocation().y;
         int currentX = x, currentY = y;
-        //tempFile.setVisible(true);
         tempFile.setLocation(x, y);
         jFrame.add(tempFile, 1, 0);
 
-        if (x < finalX) {
-            while (currentX < finalX) {
-                currentX = currentX + 10;
-                if (currentX < (x + (finalX - x) / 2))
-                    currentY = currentY + 5;
+        if (y < finalY) {
+            System.out.println("Y above");
+            while (currentY < finalY) {
+                currentY = currentY + 10;
+                if (currentY < (y + (finalY - y) / 2))
+                    currentX = currentX + 5;
                 else
-                    currentY = currentY - 5;
+                    currentX = currentX - 5;
                 tempFile.setLocation(currentX, currentY);
                 Thread.sleep(10);
             }
         } else {
-            while (currentX > finalX) {
-                currentX = currentX - 10;
-                if (currentX > (finalX + (x - finalX) / 2))
-                    currentY = currentY + 5;
+            System.out.println("Y below");
+            while (currentY > finalY) {
+                currentY = currentY - 10;
+                if (currentY > (finalY + (y - finalY) / 2))
+                    currentX = currentX + 5;
                 else
-                    currentY = currentY - 5;
+                    currentX = currentX - 5;
                 tempFile.setLocation(currentX, currentY);
                 Thread.sleep(10);
             }
