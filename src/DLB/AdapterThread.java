@@ -48,7 +48,7 @@ public class AdapterThread extends Thread {
         System.out.println("TRASFER FLAG :" + transferFlag);
         System.out.println("SLOCAL IS :" + sLocal);
         System.out.println("SREMOTE IS :" + sRemote);
-        //transferFlag = 0;
+        transferFlag = 0;
         switch (transferFlag) {
             case 0: // case when only queue length is considered.
                 if ((sLocal.getQueueLength() - sRemote.getQueueLength()) > MainThread.queueDifferenceThreshold) {

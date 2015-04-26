@@ -1,0 +1,15 @@
+#local, remote
+NODE_TYPE:local
+#NODE_IP:182.2.2.2
+#num of elements 1024*1024*NUM_ELEMENTS
+NUM_ELEMENTS:2
+#job loop
+JOB_LOOP:4000
+#guard for queue length diff
+GUARD:40
+#duty cycle for threads
+THROTTLING_VALUE:0.01
+#SM samples exchange rate
+COLLECTION_RATE:10
+#0-queue length based transfer policy #1-bw based
+TRANSFER_FLAG:1

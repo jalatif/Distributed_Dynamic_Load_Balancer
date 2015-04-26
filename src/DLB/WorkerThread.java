@@ -24,6 +24,7 @@ public class WorkerThread extends Thread {
     private ScheduledFuture<?> workHandle, sleepHandle;
     private Job currentJob;
     protected static double timePerJob ;
+    protected static int numIterations = 2000;
 
     public WorkerThread(int index, double tValue) {
         this.index = index;
@@ -35,14 +36,13 @@ public class WorkerThread extends Thread {
         workHandle = null;
         sleepHandle = null;
         setUpSleepTimer();
-
     }
 
     private Job getResult(Job job) {
         //long t1 = System.currentTimeMillis();
         Double[] data = job.getData();
         for (int i = 0; i < data.length; i++) {
-            for (int j = 0; j < 100; j++) {
+            for (int j = 0; j < numIterations; j++) {
                 data[i] = data[i] + MainThread.addVal;
             }
         }

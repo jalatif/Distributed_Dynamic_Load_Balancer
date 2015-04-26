@@ -1,0 +1,3 @@
+java -Djava.library.path=/Users/saikat/Documents/UIUC/spring_2015/cs423/mp/OS_MPS/MP4_DLB/res/lib/ -jar out/artifacts/MP4_DLB_jar/MP4_DLB.jar conf_local.txt
+
+
