@@ -122,6 +122,7 @@ public class AdapterThread extends Thread {
             MainThread.setRemoteJobsDone(sRemote.getNumJobsDone());
             MainThread.dynamicBalancerUI.addMessage(new Message(incomingMsg.getMachineId(), MessageType.SM, sRemote));
             MainThread.dynamicBalancerUI.addMessage(new Message(MainThread.machineId, MessageType.SM, sLocal));
+            MainThread.addToResult(null);
         }
 
         System.out.println("Adapter State Remote " + sRemote);

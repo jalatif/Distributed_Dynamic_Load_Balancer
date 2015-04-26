@@ -31,7 +31,7 @@ public class MainThread {
     protected volatile static boolean STOP_SIGNAL;
     protected volatile static double GUARD;
 
-    protected static int numJobs = 1024;
+    protected static int numJobs = 2048;
     protected static int numWorkerThreads = 1;
 
     protected static int utilizationFactor = 100;
@@ -156,15 +156,17 @@ public class MainThread {
     }
 
     protected static synchronized void addToResult(Job job) {
-        Double[] data = job.getData();
-        for (int i = job.getStartIndex(); i < job.getEndIndex(); i++) {
-            vectorB[i] = data[i - job.getStartIndex()];
-        }
-        if (processingDone) {
-            resultTransferred += 1;
-        } else {
-            elementsDone += data.length;
-            localJobsDone += 1;
+        if (job != null) {
+            Double[] data = job.getData();
+            for (int i = job.getStartIndex(); i < job.getEndIndex(); i++) {
+                vectorB[i] = data[i - job.getStartIndex()];
+            }
+            if (processingDone) {
+                resultTransferred += 1;
+            } else {
+                elementsDone += data.length;
+                setLocalJobsDone(localJobsDone + 1);
+            }
         }
         if (processingDone) {
             if (isLocal) {
@@ -178,7 +180,7 @@ public class MainThread {
                 }
             }
         } else {
-            int total_elements_done = elementsDone + (remoteJobsDone * elementsPerJob);
+            //int total_elements_done = elementsDone + (remoteJobsDone * elementsPerJob);
             int jobsDone = localJobsDone + remoteJobsDone;
             if (isLocal) {
 //                double progress = (total_elements_done) * 10000.0;
