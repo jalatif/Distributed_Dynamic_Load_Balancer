@@ -48,7 +48,7 @@ public class AdapterThread extends Thread {
         System.out.println("TRASFER FLAG :" + transferFlag);
         System.out.println("SLOCAL IS :" + sLocal);
         System.out.println("SREMOTE IS :" + sRemote);
-
+        transferFlag = 0;
         switch (transferFlag) {
             case 0: // case when only queue length is considered.
                 switch (MainThread.tModel) {
@@ -192,6 +192,7 @@ public class AdapterThread extends Thread {
         System.out.println("Time taken = " + (t2 - t1));
         Message msg = new Message(MainThread.machineId, MessageType.JOBTRANSFER, MainThread.numJobs / 2);
         MainThread.transferManagerThread.addMessage(msg);
+
         synchronized (MainThread.jobInQueueLock) {
             MainThread.jobsInQueue = true;
         }

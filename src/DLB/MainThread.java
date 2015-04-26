@@ -65,6 +65,7 @@ public class MainThread {
     protected static volatile Object jobInQueueLock = new Object();
     protected static volatile Object jobInComingLock = new Object();
 
+
     protected static volatile boolean jobsInQueue = false;
     protected static volatile boolean jobsInComing = false;
 
@@ -78,6 +79,7 @@ public class MainThread {
 
     protected static String ip = "localhost";//"jalatif2.ddns.net"; //"localhost";
     protected static int[] port = {2211, 2212, 2213};
+
     protected static enum TRANSFER_TYPE {
         DATA,
         STATE,
@@ -121,6 +123,7 @@ public class MainThread {
     }
 
     protected static synchronized void setLocalJobsDone(int jobs) {
+        if (jobs <= localJobsDone) return;
         localJobsDone = jobs;
     }
 
@@ -198,6 +201,15 @@ public class MainThread {
             if (jobsDone >= numJobs) {
                 processingDone = true;
                 finalRemoteJobs = remoteJobsDone;
+                try {
+                    dynamicBalancerUI.addMessage(new Message(MainThread.machineId, MessageType.SM,
+                            hwMonitorThread.getCurrentState()));
+                } catch (SigarException e) {
+                    e.printStackTrace();
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+
                 System.out.println("Finished Computing everything");
                 for (int i = 0; i < Math.min(numElements, numElementsPrint); i++)
                     System.out.print(vectorB[i] + " ");

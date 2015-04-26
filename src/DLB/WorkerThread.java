@@ -128,6 +128,7 @@ public class WorkerThread extends Thread {
         synchronized (MainThread.jobInComingLock) {
             if (MainThread.jobsInComing) return;
         }
+
         Job job;
         if (currentJob != null)
             job = currentJob;
