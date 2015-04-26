@@ -29,26 +29,40 @@ public class CommunicationThread extends Thread {
     }
 
     public void setUpStreams() throws IOException {
-//        gzout = new GZIPOutputStream(MainThread.mySocket.getOutputStream());
-//        gzin = new GZIPInputStream(MainThread.mySocket.getInputStream());
+        gzout = new GZIPOutputStream(MainThread.mySocket[socketNum].getOutputStream());
+        gzin = new GZIPInputStream(MainThread.mySocket[socketNum].getInputStream());
 
         dout = new ObjectOutputStream(MainThread.mySocket[socketNum].getOutputStream());
         din  = new ObjectInputStream(MainThread.mySocket[socketNum].getInputStream());
+
+//        din = new ObjectInputStream(gzin);
+//        dout = new ObjectOutputStream(gzout);
+
     }
 
     public synchronized void sendMessage(Object message) throws IOException {
         if (dout == null) return;
         //dout.writeUTF(message);
+        //dout = new ObjectOutputStream(gzout);
         dout.reset();
+//        gzout = new GZIPOutputStream(MainThread.mySocket[socketNum].getOutputStream());
+//        dout = new ObjectOutputStream(gzout);
         dout.writeObject(message);
         dout.flush();
+//        gzout.finish();
+//        dout.close();
     }
 
     public Object receiveMessage() throws IOException, ClassNotFoundException {
         if (din == null) return "";
         Object incomingMsg = null;
         try {
-             incomingMsg = din.readObject();
+//            din.reset();
+//            gzin = new GZIPInputStream(MainThread.mySocket[socketNum].getInputStream());
+            //din = new ObjectInputStream(gzin);
+            incomingMsg = din.readObject();
+//            din.close();
+//            gzin.close();
         }catch (ArrayStoreException ase) {
             return null;
         }

@@ -38,7 +38,7 @@ public class MainThread {
     protected static int numElementsPrint = 10;
     protected static int collectionRate = 5; // in ms
 
-    protected static int queueDifferenceThreshold = 5;
+    protected static int queueDifferenceThreshold = 10;
     protected static int cpuThresholdLimit = 10;
 
     protected static int numElements = 1024 * 1024 * 2;//1024 * 1024 * 32;
@@ -76,7 +76,7 @@ public class MainThread {
     protected static int finalRemoteJobs;
     protected static int balanceTransferred;
 
-    protected static String ip = "172.17.116.149";//"jalatif2.ddns.net"; //"localhost";
+    protected static String ip = "localhost";//"jalatif2.ddns.net"; //"localhost";
     protected static int[] port = {2211, 2212, 2213};
     protected static enum TRANSFER_TYPE {
         DATA,
@@ -90,12 +90,11 @@ public class MainThread {
     }
 
     protected static double throttlingValue = 0.01;
-    protected static boolean isLocal = true;
+    protected static boolean isLocal = !true;
     protected static int numJobIteration = 2000;
     protected static TRANSFER_MODEL tModel = TRANSFER_MODEL.SENDER_INIT;
 
-    public MainThread() throws IOException, SigarException, IllegalAccessException,
-                                                            NoSuchFieldException, InterruptedException {
+    public MainThread() {
 //        System.out.println(getClass().getClassLoader().getResource(".").getPath());
 //        String path = getClass().getClassLoader().getResource("DLB/res/lib").getPath();
 //        System.out.println(path);
@@ -104,6 +103,11 @@ public class MainThread {
 //        fieldSysPath.setAccessible( true );
 //        fieldSysPath.set(null, null);
 
+    }
+
+    protected void init() throws IOException, SigarException, IllegalAccessException,
+                                        NoSuchFieldException, InterruptedException {
+        elementsPerJob = (numElements / numJobs);
         transferManagerThread = new TransferManagerThread();
         stateManagerThread = new StateManagerThread();
         hwMonitorThread = new HWMonitorThread();
@@ -130,6 +134,7 @@ public class MainThread {
         finalRemoteJobs = 0;
         balanceTransferred = 0;
         WorkerThread.numIterations = numJobIteration;
+        elementsPerJob = (numElements / numJobs);
 
         if (!isLocal) machineId = 1;
 
@@ -305,13 +310,16 @@ public class MainThread {
                     MainThread.numElements = 1024 * 1024 * Integer.parseInt(val);
                     break;
 
+                case "NUM_JOBS":
+                    MainThread.numJobs = Integer.parseInt(val);
+                    break;
+
                 case "GUARD":
                     MainThread.GUARD = Double.parseDouble(val);
                     break;
 
                 case "THROTTLING_VALUE":
                     throttlingValue = Double.parseDouble(val);
-                    MainThread.adapterThread.setThrottlingValue(throttlingValue);
                     break;
 
                 case "COLLECTION_RATE":
@@ -325,6 +333,8 @@ public class MainThread {
                 case "NODE_TYPE":
                     if ( val.equals("remote")) {
                         isLocal = false;
+                    } else {
+                        isLocal = true;
                     }
                     break;
 
@@ -332,6 +342,33 @@ public class MainThread {
                     ip = val;
                     break;
 
+                case "TRANSFER_MODEL":
+                    switch (val.toUpperCase()) {
+                        case "SE":
+                            tModel = TRANSFER_MODEL.SENDER_INIT;
+                            break;
+                        case "RE":
+                            tModel = TRANSFER_MODEL.RECEIVER_INIT;
+                            break;
+                        case "SY":
+                            tModel = TRANSFER_MODEL.SYMMETRIC;
+                            break;
+                        default:
+                            tModel = TRANSFER_MODEL.SENDER_INIT;
+                            break;
+                    }
+                    break;
+
+                case "UTILIZATION_FACTOR":
+                    MainThread.utilizationFactor = Integer.parseInt(val);
+                    break;
+
+                case "QUEUE_DIFFERENCE":
+                    MainThread.queueDifferenceThreshold = Integer.parseInt(val);
+                    break;
+
+                default:
+                    break;
             }
         }
     }
@@ -350,26 +387,29 @@ public class MainThread {
     }
     public static void main(String[] args) throws IOException, InterruptedException, ClassNotFoundException,
                                                     SigarException, NoSuchFieldException, IllegalAccessException {
-        MainThread.GUARD = 0.5;
-        MainThread.transferFlag = 0;// 0 default only queue length
-
-        if (args.length >= 1 && args[0].equals("remote"))
-            isLocal = false;
-        if (args.length >= 2)
-            throttlingValue = Double.parseDouble(args[1]);
-        if (args.length >= 3)
-            collectionRate = Integer.parseInt(args[2]);
-        if (args.length >= 4)
-            ip = args[3];
-        if (args.length >= 5)
-            MainThread.GUARD = Integer.parseInt(args[4]);
-        if (args.length >= 6)
-            MainThread.transferFlag = Integer.parseInt(args[5]);
+//        MainThread.GUARD = 0.5;
+//        MainThread.transferFlag = 0;// 0 default only queue length
+//
+//        if (args.length >= 1 && args[0].equals("remote"))
+//            isLocal = false;
+//        if (args.length >= 2)
+//            throttlingValue = Double.parseDouble(args[1]);
+//        if (args.length >= 3)
+//            collectionRate = Integer.parseInt(args[2]);
+//        if (args.length >= 4)
+//            ip = args[3];
+//        if (args.length >= 5)
+//            MainThread.GUARD = Integer.parseInt(args[4]);
+//        if (args.length >= 6)
+//            MainThread.transferFlag = Integer.parseInt(args[5]);
 
 
         MainThread mainThread = new MainThread();
-//        mainThread.readConf(args[0]);
-//        mainThread.printConf();
+        mainThread.readConf(args[0]);
+        mainThread.printConf();
+
+        mainThread.init();
+
 
         mainThread.timePerJobCalc();
         System.out.println("TIME PER JOB ON MACHINE ID #" + MainThread.machineId + " IS (in ms) :" + MainThread.timePerJob);

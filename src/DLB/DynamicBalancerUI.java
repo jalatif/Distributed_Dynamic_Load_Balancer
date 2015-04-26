@@ -242,6 +242,7 @@ public class DynamicBalancerUI extends Thread {
                 }
             });
         }
+
     }
 
     private void moveAnimation(int machineId) throws InterruptedException {
