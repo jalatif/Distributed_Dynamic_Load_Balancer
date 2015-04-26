@@ -31,17 +31,17 @@ public class MainThread {
     protected volatile static boolean STOP_SIGNAL;
     protected volatile static double GUARD;
 
-    protected static int numJobs = 2048;
+    protected static int numJobs = 1024;
     protected static int numWorkerThreads = 1;
 
-    protected static int utilizationFactor = 1000;
+    protected static int utilizationFactor = 100;
     protected static int numElementsPrint = 10;
-    protected static int collectionRate = 10; // in ms
+    protected static int collectionRate = 5; // in ms
 
     protected static int queueDifferenceThreshold = 5;
     protected static int cpuThresholdLimit = 10;
 
-    protected static int numElements = 1024 * 1024;//1024 * 1024 * 32;
+    protected static int numElements = 1024 * 1024 * 2;//1024 * 1024 * 32;
     protected static int elementsPerJob = (numElements / numJobs);
 
     protected static double initVal = 1.111111, addVal = 1.111111;
@@ -76,15 +76,23 @@ public class MainThread {
     protected static int finalRemoteJobs;
     protected static int balanceTransferred;
 
-    protected static double throttlingValue = 0.01;
-    protected static boolean isLocal = true;
-    protected static String ip = "localhost";//"172.17.116.149";//"jalatif2.ddns.net"; //"localhost";
+    protected static String ip = "172.17.116.149";//"jalatif2.ddns.net"; //"localhost";
     protected static int[] port = {2211, 2212, 2213};
     protected static enum TRANSFER_TYPE {
         DATA,
         STATE,
         RESULT
     }
+    protected static enum TRANSFER_MODEL {
+        SENDER_INIT,
+        RECEIVER_INIT,
+        SYMMETRIC
+    }
+
+    protected static double throttlingValue = 0.01;
+    protected static boolean isLocal = true;
+    protected static int numJobIteration = 2000;
+    protected static TRANSFER_MODEL tModel = TRANSFER_MODEL.SENDER_INIT;
 
     public MainThread() throws IOException, SigarException, IllegalAccessException,
                                                             NoSuchFieldException, InterruptedException {
@@ -121,6 +129,7 @@ public class MainThread {
         processingDone = false;
         finalRemoteJobs = 0;
         balanceTransferred = 0;
+        WorkerThread.numIterations = numJobIteration;
 
         if (!isLocal) machineId = 1;
 
@@ -170,13 +179,16 @@ public class MainThread {
             }
         } else {
             int total_elements_done = elementsDone + (remoteJobsDone * elementsPerJob);
+            int jobsDone = localJobsDone + remoteJobsDone;
             if (isLocal) {
-                double progress = (total_elements_done) * 10000.0;
-                progress = progress / (1.0 * numElements);
+//                double progress = (total_elements_done) * 10000.0;
+//                progress = progress / (1.0 * numElements);
+                double progress = (jobsDone * 100.0) / (1.0 * numJobs);
                 //dynamicBalancerUI.setProgress((int) progress);
                 dynamicBalancerUI.addMessage(new Message(MainThread.machineId, MessageType.Progress, progress));
             }
-            if (total_elements_done >= numElements) {
+
+            if (jobsDone >= numJobs) {
                 processingDone = true;
                 finalRemoteJobs = remoteJobsDone;
                 System.out.println("Finished Computing everything");
@@ -297,6 +309,7 @@ public class MainThread {
 
                 case "THROTTLING_VALUE":
                     throttlingValue = Double.parseDouble(val);
+                    MainThread.adapterThread.setThrottlingValue(throttlingValue);
                     break;
 
                 case "COLLECTION_RATE":
@@ -338,23 +351,23 @@ public class MainThread {
         MainThread.GUARD = 0.5;
         MainThread.transferFlag = 0;// 0 default only queue length
 
-//        if (args.length >= 1 && args[0].equals("remote"))
-//            isLocal = false;
-//        if (args.length >= 2)
-//            throttlingValue = Double.parseDouble(args[1]);
-//        if (args.length >= 3)
-//            collectionRate = Integer.parseInt(args[2]);
-//        if (args.length >= 4)
-//            ip = args[3];
-//        if (args.length >= 5)
-//            MainThread.GUARD = Integer.parseInt(args[4]);
-//        if (args.length >= 6)
-//            MainThread.transferFlag = Integer.parseInt(args[5]);
+        if (args.length >= 1 && args[0].equals("remote"))
+            isLocal = false;
+        if (args.length >= 2)
+            throttlingValue = Double.parseDouble(args[1]);
+        if (args.length >= 3)
+            collectionRate = Integer.parseInt(args[2]);
+        if (args.length >= 4)
+            ip = args[3];
+        if (args.length >= 5)
+            MainThread.GUARD = Integer.parseInt(args[4]);
+        if (args.length >= 6)
+            MainThread.transferFlag = Integer.parseInt(args[5]);
 
 
         MainThread mainThread = new MainThread();
-        mainThread.readConf(args[0]);
-        mainThread.printConf();
+//        mainThread.readConf(args[0]);
+//        mainThread.printConf();
 
         mainThread.timePerJobCalc();
         System.out.println("TIME PER JOB ON MACHINE ID #" + MainThread.machineId + " IS (in ms) :" + MainThread.timePerJob);

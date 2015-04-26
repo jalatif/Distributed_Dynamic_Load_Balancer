@@ -24,7 +24,7 @@ public class WorkerThread extends Thread {
     private ScheduledFuture<?> workHandle, sleepHandle;
     private Job currentJob;
     protected static double timePerJob ;
-    protected static int numIterations = 2000;
+    protected static int numIterations = 1000;
 
     public WorkerThread(int index, double tValue) {
         this.index = index;
@@ -132,10 +132,10 @@ public class WorkerThread extends Thread {
         if (currentJob != null)
             job = currentJob;
         else
-            job = MainThread.jobQueue.take();//poll((long) 0.1 * MainThread.utilizationFactor, TimeUnit.MILLISECONDS);
+            job = MainThread.jobQueue.poll((long) 0.01 * MainThread.utilizationFactor, TimeUnit.MILLISECONDS);
+        if (job == null) return;
 
         currentJob = job;
-        //if (job == null) return;
         Job resultJob = getResult(job);
 
         // if local call result function otherwise send result to the local node

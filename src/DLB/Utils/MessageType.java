@@ -18,5 +18,6 @@ public enum MessageType {
     TVALUE,
     Progress,
     ResultProgress,
+    REQUESTJOBS,
     UITVALUE
 }

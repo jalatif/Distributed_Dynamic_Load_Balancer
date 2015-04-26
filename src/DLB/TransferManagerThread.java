@@ -153,6 +153,9 @@ public class TransferManagerThread extends Thread {
             case OkACK:
                 MainThread.communicationThread[MainThread.TRANSFER_TYPE.DATA.ordinal()].sendMessage(incomingMsg);
                 break;
+            case REQUESTJOBS:
+                MainThread.communicationThread[MainThread.TRANSFER_TYPE.RESULT.ordinal()].sendMessage(incomingMsg);
+                break;
             default:
                 MainThread.communicationThread[MainThread.TRANSFER_TYPE.DATA.ordinal()].sendMessage(incomingMsg);
                 break;

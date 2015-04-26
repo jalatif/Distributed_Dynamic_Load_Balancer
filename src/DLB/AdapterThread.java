@@ -48,15 +48,34 @@ public class AdapterThread extends Thread {
         System.out.println("TRASFER FLAG :" + transferFlag);
         System.out.println("SLOCAL IS :" + sLocal);
         System.out.println("SREMOTE IS :" + sRemote);
-        transferFlag = 0;
+
         switch (transferFlag) {
             case 0: // case when only queue length is considered.
-                if ((sLocal.getQueueLength() - sRemote.getQueueLength()) > MainThread.queueDifferenceThreshold) {
-                    int jobsToSend = (sLocal.getQueueLength() - sRemote.getQueueLength()) / 2;
-                    Message msg = new Message(MainThread.machineId, MessageType.JOBTRANSFER, jobsToSend);
-                    System.out.println("Matching expected time to finish by sending " + jobsToSend + " number of jobs");
-                    MainThread.transferManagerThread.addMessage(msg);
-                    MainThread.balanceTransferred++;
+                switch (MainThread.tModel) {
+                    case SENDER_INIT:
+                        if ((sLocal.getQueueLength() - sRemote.getQueueLength()) > MainThread.queueDifferenceThreshold) {
+                        int jobsToSend = (sLocal.getQueueLength() - sRemote.getQueueLength()) / 2;
+                        Message msg = new Message(MainThread.machineId, MessageType.JOBTRANSFER, jobsToSend);
+                        System.out.println("Matching expected time to finish by sending " + jobsToSend + " number of jobs");
+                        MainThread.transferManagerThread.addMessage(msg);
+                        MainThread.balanceTransferred++;
+                        }
+                        break;
+
+                    case RECEIVER_INIT:
+                        if ((sRemote.getQueueLength() - sLocal.getQueueLength()) > MainThread.queueDifferenceThreshold) {
+                            int jobsToRx = (sRemote.getQueueLength() - sLocal.getQueueLength()) / 2;
+                            Message msg = new Message(MainThread.machineId, MessageType.REQUESTJOBS, jobsToRx);
+                            System.out.println("Matching expected time to finish by asking for " + jobsToRx +
+                                    " number of job");
+                            MainThread.transferManagerThread.addMessage(msg);
+                        }
+                        break;
+
+                    case SYMMETRIC:
+                        break;
+                    default:
+                        break;
                 }
             break;
 
@@ -99,6 +118,7 @@ public class AdapterThread extends Thread {
         StateInfo sLocal = MainThread.hwMonitorThread.getCurrentState();
 
         if (MainThread.isLocal) {
+            MainThread.setLocalJobsDone(sLocal.getNumJobsDone());
             MainThread.setRemoteJobsDone(sRemote.getNumJobsDone());
             MainThread.dynamicBalancerUI.addMessage(new Message(incomingMsg.getMachineId(), MessageType.SM, sRemote));
             MainThread.dynamicBalancerUI.addMessage(new Message(MainThread.machineId, MessageType.SM, sLocal));

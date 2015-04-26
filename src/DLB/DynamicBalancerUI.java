@@ -8,10 +8,7 @@ import javax.swing.*;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.awt.*;
-import java.io.ByteArrayOutputStream;
-import java.io.FileOutputStream;
-import java.io.ObjectOutputStream;
-import java.io.OutputStream;
+import java.io.*;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
@@ -120,7 +117,7 @@ public class DynamicBalancerUI extends Thread {
         jProgressBar.setStringPainted(true);
         jProgressBar.setPreferredSize(new Dimension(500, 50));
         jProgressBar.setMinimum(0);
-        jProgressBar.setMaximum(10000);
+        jProgressBar.setMaximum(100);
         jFrame.add(jProgressBar);
         setProgress(0);
 
@@ -209,16 +206,17 @@ public class DynamicBalancerUI extends Thread {
         //if (progress > 100) progress = 100;
 
         jProgressBar.setValue(progress);
-        if (progress <= 2500) {
+        if (progress <= 25) {
             jProgressBar.setForeground(Color.RED);
-        } else if (progress > 2500 && progress < 7500) {
+        } else if (progress > 25 && progress < 75) {
             jProgressBar.setForeground(Color.BLUE);
-        } else if (progress >= 7500) {
+        } else if (progress >= 75) {
             jProgressBar.setForeground(Color.GREEN);
         }
-        int decimal = progress / 100;
-        int unit = progress % 100;
-        jProgressBar.setString(decimal + "." + unit + "%");
+//        int decimal = progress / 100;
+//        int unit = progress % 100;
+        jProgressBar.setString(progress + "%");
+        //jProgressBar.setString(decimal + "." + unit + "%");
     }
 
     private String[][] getStateData(StateInfo stateInfo) {
@@ -343,9 +341,18 @@ public class DynamicBalancerUI extends Thread {
         }
     }
 
-    public static void main(String[] args) {
-        DynamicBalancerUI dbUI = new DynamicBalancerUI();
-        dbUI.start();
+    public static void main(String[] args) throws IOException {
+//        DynamicBalancerUI dbUI = new DynamicBalancerUI();
+//        dbUI.start();
+        Object data = "aaaaaaaaaaa";
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        GZIPOutputStream gzipOut = new GZIPOutputStream(baos);
+        ObjectOutputStream objectOut = new ObjectOutputStream(gzipOut);
+        objectOut.writeObject(data);
+        objectOut.close();
+        byte[] bytes = baos.toByteArray();
+
     }
 
 }

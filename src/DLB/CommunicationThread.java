@@ -137,6 +137,14 @@ public class CommunicationThread extends Thread {
                         MainThread.adapterThread.addMessage(msg);
                         break;
 
+                    case REQUESTJOBS:
+                        System.out.println("Got request jobs message");
+                        int numToSend = (int) msg.getData();
+                        MainThread.transferManagerThread.addMessage(new Message(MainThread.machineId,
+                                MessageType.JOBTRANSFER, numToSend));
+                        MainThread.balanceTransferred++;
+                        break;
+
                     case TVALUE:
                         MainThread.adapterThread.setThrottlingValue((double) msg.getData());
                         break;
