@@ -1,3 +1,5 @@
+
+
 package DLB;
 
 import DLB.Utils.Message;
@@ -61,7 +63,7 @@ public class DynamicBalancerUI extends Thread {
     private void initUI() {
         jFrame = new JFrame();
         jFrame.setLayout(new FlowLayout());
-        jFrame.setSize(2150, 1560);
+        jFrame.setSize(1600, 1200);
         jFrame.setTitle("Dynamic Load Balancer");
         jFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         jFrame.setDefaultLookAndFeelDecorated(true);
@@ -92,7 +94,7 @@ public class DynamicBalancerUI extends Thread {
             //spinner properties
             jSpinners[i] = new JSpinner(new SpinnerNumberModel(MainThread.throttlingValue, 0.0, 1.0, 0.1));
             jSpinners[i].setName(String.valueOf(i));
-            jSpinners[i].setPreferredSize(new Dimension(100, 50));
+            jSpinners[i].setPreferredSize(new Dimension(75, 30));
             //((JSpinner.DefaultEditor) jSpinners[i].getEditor()).getTextField().setEditable(false);
 
             //label
@@ -106,15 +108,21 @@ public class DynamicBalancerUI extends Thread {
             jScrollPanes[i] = new JScrollPane();
             jTables[i] = new JTable(getStateData(new StateInfo(0, 0, false, false, 0)), columnNames);
             //jTables[i].setMinimumSize(new Dimension(200, 200));
-            jTables[i].setRowHeight(50);
+            jTables[i].setRowHeight(30);
             jTables[i].setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
-            jTables[i].setFont(new Font("Monaco", Font.BOLD, 24));
+            jTables[i].setFont(new Font("Monaco", Font.BOLD, 20));
             jScrollPanes[i] = new JScrollPane(jTables[i],
                     JScrollPane.VERTICAL_SCROLLBAR_ALWAYS, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-                    //add all containers
+            //add all containers
             jScrollPanes[i].setWheelScrollingEnabled(true);
             JScrollBar bar = jScrollPanes[i].getVerticalScrollBar();
-            bar.setPreferredSize(new Dimension(30, 10));
+            bar.setPreferredSize(new Dimension(20, 10));
+
+            jTables[i].setPreferredScrollableViewportSize(jTables[i].getPreferredSize());
+            jTables[i].setPreferredScrollableViewportSize(new Dimension(300 +
+                    ((int) jTables[i].getPreferredSize().getWidth()),
+                    50 + ((int) jTables[i].getPreferredSize().getHeight())));
+            jTables[i].setFillsViewportHeight(true);
 
             jFrame.add(jSpinners[i]);
             jFrame.add(jLabels[i]);
@@ -122,11 +130,11 @@ public class DynamicBalancerUI extends Thread {
             jFrame.add(jchannelInfos[i]);
             jFrame.add(jTransInfos[i]);
             jFrame.add(jScrollPanes[i]);
-            jFrame.add(Box.createRigidArea(new Dimension(900,0)));
+            jFrame.add(Box.createRigidArea(new Dimension(400,0)));
         }
         jProgressBar = new JProgressBar();
         jProgressBar.setStringPainted(true);
-        jProgressBar.setPreferredSize(new Dimension(500, 50));
+        jProgressBar.setPreferredSize(new Dimension(250, 30));
         jProgressBar.setMinimum(0);
         jProgressBar.setMaximum(100);
         jFrame.add(jProgressBar);
@@ -134,7 +142,7 @@ public class DynamicBalancerUI extends Thread {
 
         jResultBar = new JProgressBar();
         jResultBar.setStringPainted(true);
-        jResultBar.setPreferredSize(new Dimension(500, 50));
+        jResultBar.setPreferredSize(new Dimension(250, 30));
         jResultBar.setMinimum(0);
         jResultBar.setMaximum(100);
         jFrame.add(jResultBar);
@@ -367,3 +375,4 @@ public class DynamicBalancerUI extends Thread {
     }
 
 }
+

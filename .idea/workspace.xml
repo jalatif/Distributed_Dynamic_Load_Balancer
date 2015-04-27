@@ -32,7 +32,7 @@
         <entry file="file://$PROJECT_DIR$/src/DLB/MainThread.java">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="255" column="13" selection-start-line="255" selection-start-column="13" selection-end-line="255" selection-end-column="13" />
+              <caret line="256" column="69" selection-start-line="256" selection-start-column="69" selection-end-line="256" selection-end-column="69" />
               <folding>
                 <element signature="e#4522#4523#0" expanded="true" />
                 <element signature="e#4559#4560#0" expanded="true" />
@@ -41,23 +41,25 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="conf_local.txt" pinned="false" current-in-tab="true">
+      <file leaf-file-name="conf_local.txt" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/conf_local.txt">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.03171806">
-              <caret line="1" column="16" selection-start-line="1" selection-start-column="10" selection-end-line="1" selection-end-column="16" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="33" column="19" selection-start-line="33" selection-start-column="19" selection-end-line="33" selection-end-column="19" />
               <folding />
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="DynamicBalancerUI.java" pinned="false" current-in-tab="false">
+      <file leaf-file-name="DynamicBalancerUI.java" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/DLB/DynamicBalancerUI.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="364" column="67" selection-start-line="364" selection-start-column="67" selection-end-line="364" selection-end-column="67" />
+            <state vertical-scroll-proportion="0.52422905">
+              <caret line="365" column="46" selection-start-line="365" selection-start-column="46" selection-end-line="365" selection-end-column="46" />
               <folding>
                 <element signature="imports" expanded="true" />
+                <element signature="e#11428#11429#0" expanded="true" />
+                <element signature="e#11465#11466#0" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -180,8 +182,8 @@
         <option value="$PROJECT_DIR$/src/DLB/WorkerThread.java" />
         <option value="$PROJECT_DIR$/src/DLB/CommunicationThread.java" />
         <option value="$PROJECT_DIR$/src/DLB/MainThread.java" />
-        <option value="$PROJECT_DIR$/src/DLB/DynamicBalancerUI.java" />
         <option value="$PROJECT_DIR$/conf_local.txt" />
+        <option value="$PROJECT_DIR$/src/DLB/DynamicBalancerUI.java" />
       </list>
     </option>
   </component>
@@ -343,7 +345,7 @@
       <recent name="$PROJECT_DIR$/src/res" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.MainThread">
+  <component name="RunManager" selected="Application.DynamicBalancerUI">
     <configuration default="false" name="SystemStat" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <extension name="coverage" enabled="false" merge="false" sample_coverage="true" runner="idea">
         <pattern>
@@ -816,12 +818,12 @@
       <workItem from="1430008442292" duration="8547000" />
       <workItem from="1430017161847" duration="18523000" />
       <workItem from="1430090857332" duration="1039000" />
-      <workItem from="1430097868692" duration="8482000" />
+      <workItem from="1430097868692" duration="12246000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="210075000" />
+    <option name="totallyTimeSpent" value="213839000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="-8" y="-2" width="3856" height="2110" extended-state="6" />
@@ -835,7 +837,7 @@
       <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
-      <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.37763712" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
+      <window_info id="Run" active="true" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.37763712" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.3285865" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Designer" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.15178096" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
@@ -1250,14 +1252,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/DLB/WorkerThread.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="135" column="47" selection-start-line="135" selection-start-column="47" selection-end-line="135" selection-end-column="47" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/src/DLB/CommunicationThread.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -1266,20 +1260,18 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/DLB/DynamicBalancerUI.java">
+    <entry file="file://$PROJECT_DIR$/conf_local.txt">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="364" column="67" selection-start-line="364" selection-start-column="67" selection-end-line="364" selection-end-column="67" />
-          <folding>
-            <element signature="imports" expanded="true" />
-          </folding>
+          <caret line="33" column="19" selection-start-line="33" selection-start-column="19" selection-end-line="33" selection-end-column="19" />
+          <folding />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/DLB/MainThread.java">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="255" column="13" selection-start-line="255" selection-start-column="13" selection-end-line="255" selection-end-column="13" />
+          <caret line="256" column="69" selection-start-line="256" selection-start-column="69" selection-end-line="256" selection-end-column="69" />
           <folding>
             <element signature="e#4522#4523#0" expanded="true" />
             <element signature="e#4559#4560#0" expanded="true" />
@@ -1287,11 +1279,23 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/conf_local.txt">
+    <entry file="file://$PROJECT_DIR$/src/DLB/WorkerThread.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.03171806">
-          <caret line="1" column="16" selection-start-line="1" selection-start-column="10" selection-end-line="1" selection-end-column="16" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="135" column="47" selection-start-line="135" selection-start-column="47" selection-end-line="135" selection-end-column="47" />
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/DLB/DynamicBalancerUI.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.52422905">
+          <caret line="365" column="46" selection-start-line="365" selection-start-column="46" selection-end-line="365" selection-end-column="46" />
+          <folding>
+            <element signature="imports" expanded="true" />
+            <element signature="e#11428#11429#0" expanded="true" />
+            <element signature="e#11465#11466#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
