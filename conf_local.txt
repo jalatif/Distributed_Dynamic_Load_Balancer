@@ -38,3 +38,6 @@ NUMWORKERS:5
 
 #USE_UI true, false
 USE_UI:true
+
+#COMPRESSED:0,1
+COMPRESSED:1

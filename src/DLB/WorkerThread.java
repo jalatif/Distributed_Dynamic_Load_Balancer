@@ -133,7 +133,7 @@ public class WorkerThread extends Thread {
         if (currentJob != null)
             job = currentJob;
         else
-            job = MainThread.jobQueue.poll((long) 0.01 * MainThread.utilizationFactor, TimeUnit.MILLISECONDS);
+            job = MainThread.jobQueue.pollLast((long) 0.01 * MainThread.utilizationFactor, TimeUnit.MILLISECONDS);
         if (job == null) return;
 
         currentJob = job;
