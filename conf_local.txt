@@ -1,7 +1,7 @@
 #local, remote
 NODE_TYPE:local
 
-NODE_IP:172.17.116.149
+NODE_IP:172.22.156.73
 
 #num of elements 1024*1024*NUM_ELEMENTS
 NUM_ELEMENTS:2
@@ -16,7 +16,7 @@ JOB_LOOP:4000
 GUARD:40
 
 #duty cycle for threads
-THROTTLING_VALUE:0.01
+THROTTLING_VALUE:0.3
 
 #SM samples exchange rate
 COLLECTION_RATE:5

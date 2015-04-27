@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.*;
 import java.util.Arrays;
+import java.util.DoubleSummaryStatistics;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -239,8 +240,9 @@ public class MainThread {
         /////////////////////Test Output//////////////////////////
         if (isLocal) {
             System.out.println("Wait testing the output");
+            double sameResult = vectorB[0];
             for (int i = 0; i < vectorB.length; i++) {
-                if (vectorB[i] == vectorA[i] || vectorB[i] == 0.0) {
+                if (vectorB[i] == vectorA[i] || vectorB[i] == 0.0 || Double.compare(vectorB[i], sameResult) != 0) {
                     System.out.println("Resultant Output incorrect at " + i + " index with value = " + vectorB[i]);
                     System.exit(1);
                 }

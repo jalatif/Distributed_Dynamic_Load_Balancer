@@ -1,0 +1,1 @@
+java -jar MP4_DLB.jar res conf_remote.txt
