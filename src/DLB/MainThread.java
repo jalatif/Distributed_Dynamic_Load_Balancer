@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.lang.reflect.Field;
 import java.net.*;
 import java.util.Arrays;
-import java.util.DoubleSummaryStatistics;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -35,6 +34,8 @@ public class MainThread {
     protected static int utilizationFactor = 100;
     protected static int numElementsPrint = 10;
     protected static int collectionRate = 5; // in ms
+
+    protected static double bandwidth;
 
     protected static int queueDifferenceThreshold = 10;
     protected static int cpuThresholdLimit = 10;

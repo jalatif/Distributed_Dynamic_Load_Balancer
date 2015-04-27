@@ -48,13 +48,14 @@ public class AdapterThread extends Thread {
         System.out.println("TRASFER FLAG :" + transferFlag);
         System.out.println("SLOCAL IS :" + sLocal);
         System.out.println("SREMOTE IS :" + sRemote);
-        transferFlag = 0;
+        int jobsToSend;
+        int jobsToRx;
         switch (transferFlag) {
             case 0: // case when only queue length is considered.
                 switch (MainThread.tModel) {
                     case SENDER_INIT:
                         if ((sLocal.getQueueLength() - sRemote.getQueueLength()) > MainThread.queueDifferenceThreshold) {
-                        int jobsToSend = (sLocal.getQueueLength() - sRemote.getQueueLength()) / 2;
+                        jobsToSend = (sLocal.getQueueLength() - sRemote.getQueueLength()) / 2;
                         Message msg = new Message(MainThread.machineId, MessageType.JOBTRANSFER, jobsToSend);
                         System.out.println("Matching expected time to finish by sending " + jobsToSend + " number of jobs");
                         MainThread.transferManagerThread.addMessage(msg);
@@ -64,7 +65,7 @@ public class AdapterThread extends Thread {
 
                     case RECEIVER_INIT:
                         if ((sRemote.getQueueLength() - sLocal.getQueueLength()) > MainThread.queueDifferenceThreshold) {
-                            int jobsToRx = (sRemote.getQueueLength() - sLocal.getQueueLength()) / 2;
+                            jobsToRx = (sRemote.getQueueLength() - sLocal.getQueueLength()) / 2;
                             Message msg = new Message(MainThread.machineId, MessageType.REQUESTJOBS, jobsToRx);
                             System.out.println("Matching expected time to finish by asking for " + jobsToRx +
                                     " number of job");
@@ -80,7 +81,7 @@ public class AdapterThread extends Thread {
             break;
 
             case 1: // case when time to completion is considered.
-                System.out.println("CASE CASE CASE CASE 1");
+                System.out.println("CONSIDERING TIME TO COMPLETION : CASE 1 : TRANSFERFLAG set 1");
 //                x * bytesperjob / bw = (jobqlength - x) * timetocomplteonejob * throttlefactor
 //                lhs  =  rhs - gaurd
 //                WorkerThread.timePerJob * MainThread.throttlingValue;
@@ -88,7 +89,7 @@ public class AdapterThread extends Thread {
                 double localMetrics = sLocal.getTimePerJob() * sLocal.getQueueLength() * sLocal.getThrottlingValue();
                 int remoteQ = sRemote.getQueueLength();
                 int localQ = sLocal.getQueueLength();
-                int jobsToSend = 0 ;
+                jobsToSend = 0 ;
 
                 if (localMetrics > remoteMetrics + MainThread.GUARD) {
                     while ((localMetrics - remoteMetrics) >= MainThread.GUARD) {
@@ -102,6 +103,43 @@ public class AdapterThread extends Thread {
                     MainThread.balanceTransferred++;
                 }
                 break;
+            case 2:
+                // case handling bandwidth
+                switch (MainThread.tModel) {
+                    case SENDER_INIT:
+                        double slocalTimeToCompletion = sLocal.getTimePerJob() * sLocal.getQueueLength();
+                        double sRemoteTimeToCompletion = sRemote.getTimePerJob() * sLocal.getQueueLength();
+                        double sLocalBW = sLocal.getBwUsage();
+                        double sRemoteBW = sRemote.getBwUsage();
+
+
+//                        if ( slocalTimeToCompletion * sLocalBW > slocalTimeToCompletion )
+
+
+                        if ((sLocal.getQueueLength() - sRemote.getQueueLength()) > MainThread.queueDifferenceThreshold) {
+                            jobsToSend = (sLocal.getQueueLength() - sRemote.getQueueLength()) / 2;
+                            Message msg = new Message(MainThread.machineId, MessageType.JOBTRANSFER, jobsToSend);
+                            System.out.println("Matching expected time to finish by sending " + jobsToSend + " number of jobs");
+                            MainThread.transferManagerThread.addMessage(msg);
+                            MainThread.balanceTransferred++;
+                        }
+                        break;
+
+                    case RECEIVER_INIT:
+                        if ((sRemote.getQueueLength() - sLocal.getQueueLength()) > MainThread.queueDifferenceThreshold) {
+                            jobsToRx = (sRemote.getQueueLength() - sLocal.getQueueLength()) / 2;
+                            Message msg = new Message(MainThread.machineId, MessageType.REQUESTJOBS, jobsToRx);
+                            System.out.println("Matching expected time to finish by asking for " + jobsToRx +
+                                    " number of job");
+                            MainThread.transferManagerThread.addMessage(msg);
+                        }
+                        break;
+
+                    case SYMMETRIC:
+                        break;
+                    default:
+                        break;
+                }
         }
 
     }
@@ -175,6 +213,11 @@ public class AdapterThread extends Thread {
         messages.add(msg);
     }
 
+    private double findBandwidth(long timeToTransfer){
+        double dataSize = MainThread.numElements * 8 ;// size of double times the number of elements.
+        return dataSize / timeToTransfer;
+    }
+
     private void bootstrapJobs() {
         int jobItems = MainThread.numElements / MainThread.numJobs;
         long t1 = System.currentTimeMillis();
@@ -190,6 +233,8 @@ public class AdapterThread extends Thread {
         }
         long t2 = System.currentTimeMillis();
         System.out.println("Time taken = " + (t2 - t1));
+        MainThread.bandwidth = findBandwidth(t2-t1);
+        System.out.println("BANDWIDTH : "+MainThread.numElements*8+" :"+MainThread.bandwidth+" in BYTES PER SECOND");
         Message msg = new Message(MainThread.machineId, MessageType.JOBTRANSFER, MainThread.numJobs / 2);
         MainThread.transferManagerThread.addMessage(msg);
 
