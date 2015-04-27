@@ -38,10 +38,12 @@ public class DynamicBalancerUI extends Thread {
 
     String[] columnNames = {"Property", "Value"};
 
+    String resourcePath = "";
 
     private boolean isVisible = true;
 
-    public DynamicBalancerUI(boolean visible) {
+    public DynamicBalancerUI(boolean visible, String path) {
+        resourcePath = path + "/" + "images";
         messageQueue = new LinkedBlockingQueue<>();
         throttleValues = new double[numMachines];
         machineStates = new StateInfo[numMachines];
@@ -77,12 +79,12 @@ public class DynamicBalancerUI extends Thread {
 //        ImageIcon machine = new ImageIcon(path + "/pc-icon.png");
 //        ImageIcon file = new ImageIcon(path + "/file.png");
 
-        String resource_path = "res/images/";//getClass().getClassLoader().getResource("/resources/images/").getPath();//"res/images/";
+        //String resource_path = "res/images/";//getClass().getClassLoader().getResource("/resources/images/").getPath();//"res/images/";
 
-        ImageIcon machine = new ImageIcon(resource_path + "pc-icon.png");
-        ImageIcon file = new ImageIcon(resource_path + "file.png");
-        red_button = new ImageIcon(resource_path + "red-icon.png");
-        green_button = new ImageIcon(resource_path + "green-icon.png");
+        ImageIcon machine = new ImageIcon(resourcePath + "/" + "pc-icon.png");
+        ImageIcon file = new ImageIcon(resourcePath + "/" + "file.png");
+        red_button = new ImageIcon(resourcePath + "/" + "red-icon.png");
+        green_button = new ImageIcon(resourcePath + "/" + "green-icon.png");
 
         tempFile = new JLabel(file);
 
@@ -360,17 +362,8 @@ public class DynamicBalancerUI extends Thread {
     }
 
     public static void main(String[] args) throws IOException {
-//        DynamicBalancerUI dbUI = new DynamicBalancerUI();
-//        dbUI.start();
-        Object data = "aaaaaaaaaaa";
-
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        GZIPOutputStream gzipOut = new GZIPOutputStream(baos);
-        ObjectOutputStream objectOut = new ObjectOutputStream(gzipOut);
-        objectOut.writeObject(data);
-        objectOut.close();
-        byte[] bytes = baos.toByteArray();
-
+        DynamicBalancerUI dbUI = new DynamicBalancerUI(true, "res");
+        dbUI.start();
     }
 
 }

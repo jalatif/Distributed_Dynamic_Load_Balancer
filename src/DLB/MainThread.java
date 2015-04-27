@@ -55,6 +55,7 @@ public class MainThread {
     protected volatile static int transferFlag;
     protected volatile static double timePerJob;
     protected static double compressed = 0;
+    protected static String resourcePath = "";
 
     protected static int machineId = 0;
 
@@ -94,14 +95,14 @@ public class MainThread {
     protected static int numJobIteration = 2000;
     protected static TRANSFER_MODEL tModel = TRANSFER_MODEL.SENDER_INIT;
 
-    public MainThread() throws NoSuchFieldException, IllegalAccessException {
-//        System.out.println(this.getClass().getResource(".").getPath());
-//        String path = this.getClass().getResource(".").getPath();
-//        System.out.println("Path = " + path);
-//        System.setProperty("java.library.path", path);
-//        Field fieldSysPath = ClassLoader.class.getDeclaredField( "sys_paths" );
-//        fieldSysPath.setAccessible( true );
-//        fieldSysPath.set(null, null);
+    public MainThread(String rpath) throws NoSuchFieldException, IllegalAccessException {
+        this.resourcePath = rpath;
+        String path = resourcePath + "/" + "lib";
+        System.out.println("Path = " + path);
+        System.setProperty("java.library.path", path);
+        Field fieldSysPath = ClassLoader.class.getDeclaredField( "sys_paths" );
+        fieldSysPath.setAccessible( true );
+        fieldSysPath.set(null, null);
     }
 
     protected void init() throws IOException, SigarException, InterruptedException {
@@ -115,7 +116,7 @@ public class MainThread {
             communicationThread[i] = new CommunicationThread(i);
         }
         if (isLocal)
-            dynamicBalancerUI = new DynamicBalancerUI(USE_UI);
+            dynamicBalancerUI = new DynamicBalancerUI(USE_UI, resourcePath);
     }
 
     protected static synchronized void setLocalJobsDone(int jobs) {
@@ -239,7 +240,7 @@ public class MainThread {
         if (isLocal) {
             System.out.println("Wait testing the output");
             for (int i = 0; i < vectorB.length; i++) {
-                if (vectorB[i] == vectorA[i]) {
+                if (vectorB[i] == vectorA[i] || vectorB[i] == 0.0) {
                     System.out.println("Resultant Output incorrect at " + i + " index with value = " + vectorB[i]);
                     System.exit(1);
                 }
@@ -424,8 +425,9 @@ public class MainThread {
 //            MainThread.transferFlag = Integer.parseInt(args[5]);
 
 
-        MainThread mainThread = new MainThread();
-        mainThread.readConf(args[0]);
+        MainThread mainThread = new MainThread(args[0]);
+
+        mainThread.readConf(args[1]);
         mainThread.printConf();
 
         mainThread.init();
