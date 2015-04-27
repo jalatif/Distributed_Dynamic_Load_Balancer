@@ -4,6 +4,7 @@
     <root id="archive" name="MP4_DLB.jar">
       <element id="module-output" name="MP4_DLB" />
       <element id="extracted-dir" path="$USER_HOME$/Setups/sigar-1.6.4.jar" path-in-jar="/" />
+      <element id="dir-copy" path="$PROJECT_DIR$/resources" />
     </root>
   </artifact>
 </component>

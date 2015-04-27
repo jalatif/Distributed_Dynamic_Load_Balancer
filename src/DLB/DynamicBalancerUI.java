@@ -10,7 +10,6 @@ import javax.swing.event.ChangeListener;
 import java.awt.*;
 import java.io.*;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 
 /**
@@ -39,13 +38,23 @@ public class DynamicBalancerUI extends Thread {
 
     String[] columnNames = {"Property", "Value"};
 
-    public DynamicBalancerUI() {
+
+    private boolean isVisible = true;
+
+    public DynamicBalancerUI(boolean visible) {
         messageQueue = new LinkedBlockingQueue<>();
         throttleValues = new double[numMachines];
         machineStates = new StateInfo[numMachines];
-        changeLooks();
-        initUI();
+        if (visible) {
+            changeLooks();
+            initUI();
+            isVisible = true;
+        } else {
+            isVisible = false;
+        }
     }
+
+
 
     private void initUI() {
         jFrame = new JFrame();
@@ -68,7 +77,7 @@ public class DynamicBalancerUI extends Thread {
 //        ImageIcon machine = new ImageIcon(path + "/pc-icon.png");
 //        ImageIcon file = new ImageIcon(path + "/file.png");
 
-        String resource_path = "res/images/";
+        String resource_path = "res/images/";//getClass().getClassLoader().getResource("/resources/images/").getPath();//"res/images/";
 
         ImageIcon machine = new ImageIcon(resource_path + "pc-icon.png");
         ImageIcon file = new ImageIcon(resource_path + "file.png");
@@ -154,6 +163,7 @@ public class DynamicBalancerUI extends Thread {
     }
 
     private void changeThrottleValue(int machineId, double value) {
+        if (!isVisible) return;
         if (machineId == MainThread.machineId)
             MainThread.adapterThread.setThrottlingValue(value);
         else {
@@ -166,6 +176,7 @@ public class DynamicBalancerUI extends Thread {
     }
 
     protected void setState(int machineId, StateInfo stateInfo) {
+        if (!isVisible) return;
         String[][] datavalues = getStateData(stateInfo);
         for (int i = 0; i < datavalues.length; i++) {
             jTables[machineId].setValueAt(datavalues[i][0], i, 0);
@@ -174,6 +185,7 @@ public class DynamicBalancerUI extends Thread {
     }
 
     protected void changeTransferStatus(int machineId, boolean status) {
+        if (!isVisible) return;
         if (jTransInfos[machineId].getName().equals("green")) {
             if (status) {
                 jTransInfos[machineId].setName("red");
@@ -190,6 +202,7 @@ public class DynamicBalancerUI extends Thread {
     }
 
     protected void setResultProgress(int progress) {
+        if (!isVisible) return;
         jResultBar.setValue(progress);
         if (progress <= 25) {
             jResultBar.setForeground(Color.RED);
@@ -204,7 +217,7 @@ public class DynamicBalancerUI extends Thread {
     protected void setProgress(int progress) {
         //if (progress < 0) progress = 0;
         //if (progress > 100) progress = 100;
-
+        if (!isVisible) return;
         jProgressBar.setValue(progress);
         if (progress <= 25) {
             jProgressBar.setForeground(Color.RED);
@@ -220,6 +233,7 @@ public class DynamicBalancerUI extends Thread {
     }
 
     private String[][] getStateData(StateInfo stateInfo) {
+        if (!isVisible) return null;
         String[] keys = stateInfo.getFormattedKeys();
         String[] vals = stateInfo.getFormattedValues();
 
@@ -242,7 +256,6 @@ public class DynamicBalancerUI extends Thread {
                 }
             });
         }
-
     }
 
     private void moveAnimation(int machineId) throws InterruptedException {
@@ -285,11 +298,14 @@ public class DynamicBalancerUI extends Thread {
     }
 
     private void setThrottleValues(int machineId, double value) {
+        if (!isVisible) return;
         jSpinners[machineId].setValue(value);
     }
 
     private void updateUI() throws InterruptedException {
         Message msg = messageQueue.take();
+        if (!isVisible)
+            return;
         System.out.println("UI has got a message " + msg);
         double progress = 0.0;
         Long prg = 0l;
@@ -332,7 +348,8 @@ public class DynamicBalancerUI extends Thread {
 
     @Override
     public void run() {
-        jFrame.setVisible(true);
+        if (isVisible)
+            jFrame.setVisible(true);
         while (!MainThread.STOP_SIGNAL) {
             try {
                 updateUI();

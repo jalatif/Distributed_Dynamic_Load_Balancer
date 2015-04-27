@@ -1,30 +1,30 @@
 #local, remote
 NODE_TYPE:remote
 
-NODE_IP:172.17.116.149
+#NODE_IP:172.17.116.149
 
 #num of elements 1024*1024*NUM_ELEMENTS
-NUM_ELEMENTS:2
+NUM_ELEMENTS:8
 
 #numJobs
-NUM_JOBS:2048
+NUM_JOBS:4096
 
 #job loop
-JOB_LOOP:1000
+JOB_LOOP:4000
 
 #guard for queue length diff
 GUARD:40
 
 #duty cycle for threads
-THROTTLING_VALUE:0.8
+THROTTLING_VALUE:0.01
 
 #SM samples exchange rate
-COLLECTION_RATE:10
+COLLECTION_RATE:5
 
 #0-queue length based transfer policy #1-bw based
 TRANSFER_FLAG:1
 
-#transfer model type, SE,RE,SY
+#transfer model type:SE,RE,SY
 #TRANSFER_MODEL:SE
 
 #UtilizationFactor
@@ -32,3 +32,9 @@ UTILIZATION_FACTOR:100
 
 #QUEUE_DIFFERENCE
 QUEUE_DIFFERENCE:10
+
+#NUM WORKERS
+NUMWORKERS:5
+
+#USE_UI true, false
+USE_UI:true

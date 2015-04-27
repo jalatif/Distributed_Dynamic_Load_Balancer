@@ -3,7 +3,6 @@ package DLB;
 import DLB.Utils.Job;
 import DLB.Utils.Message;
 import DLB.Utils.MessageType;
-import DLB.Utils.SystemStat;
 import org.hyperic.sigar.SigarException;
 
 import java.io.BufferedReader;
@@ -14,8 +13,6 @@ import java.net.*;
 import java.util.Arrays;
 import java.util.concurrent.BlockingDeque;
 import java.util.concurrent.LinkedBlockingDeque;
-import java.util.concurrent.locks.Lock;
-import java.util.concurrent.locks.ReentrantLock;
 
 /**
  * Created by manshu on 4/16/15.
@@ -76,6 +73,7 @@ public class MainThread {
     protected static int resultTransferred;
     protected static int finalRemoteJobs;
     protected static int balanceTransferred;
+    protected static boolean USE_UI = false;
 
     protected static String ip = "localhost";//"jalatif2.ddns.net"; //"localhost";
     protected static int[] port = {2211, 2212, 2213};
@@ -92,23 +90,21 @@ public class MainThread {
     }
 
     protected static double throttlingValue = 0.01;
-    protected static boolean isLocal = !true;
+    protected static boolean isLocal = true;
     protected static int numJobIteration = 2000;
     protected static TRANSFER_MODEL tModel = TRANSFER_MODEL.SENDER_INIT;
 
-    public MainThread() {
-//        System.out.println(getClass().getClassLoader().getResource(".").getPath());
-//        String path = getClass().getClassLoader().getResource("DLB/res/lib").getPath();
-//        System.out.println(path);
+    public MainThread() throws NoSuchFieldException, IllegalAccessException {
+//        System.out.println(this.getClass().getResource(".").getPath());
+//        String path = this.getClass().getResource(".").getPath();
+//        System.out.println("Path = " + path);
 //        System.setProperty("java.library.path", path);
 //        Field fieldSysPath = ClassLoader.class.getDeclaredField( "sys_paths" );
 //        fieldSysPath.setAccessible( true );
 //        fieldSysPath.set(null, null);
-
     }
 
-    protected void init() throws IOException, SigarException, IllegalAccessException,
-                                        NoSuchFieldException, InterruptedException {
+    protected void init() throws IOException, SigarException, InterruptedException {
         elementsPerJob = (numElements / numJobs);
         transferManagerThread = new TransferManagerThread();
         stateManagerThread = new StateManagerThread();
@@ -119,7 +115,7 @@ public class MainThread {
             communicationThread[i] = new CommunicationThread(i);
         }
         if (isLocal)
-            dynamicBalancerUI = new DynamicBalancerUI();
+            dynamicBalancerUI = new DynamicBalancerUI(USE_UI);
     }
 
     protected static synchronized void setLocalJobsDone(int jobs) {
@@ -243,7 +239,7 @@ public class MainThread {
         if (isLocal) {
             System.out.println("Wait testing the output");
             for (int i = 0; i < vectorB.length; i++) {
-                if (vectorB[i] != (vectorA[i] + 1000 * addVal)) {
+                if (vectorB[i] == vectorA[i]) {
                     System.out.println("Resultant Output incorrect at " + i + " index with value = " + vectorB[i]);
                     System.exit(1);
                 }
@@ -342,6 +338,10 @@ public class MainThread {
                     MainThread.transferFlag = Integer.parseInt(val);
                     break;
 
+                case "NUMWORKERS":
+                    MainThread.numWorkerThreads = Integer.parseInt(val);
+                    break;
+
                 case "NODE_TYPE":
                     if ( val.equals("remote")) {
                         isLocal = false;
@@ -377,6 +377,10 @@ public class MainThread {
 
                 case "QUEUE_DIFFERENCE":
                     MainThread.queueDifferenceThreshold = Integer.parseInt(val);
+                    break;
+
+                case "USE_UI":
+                    MainThread.USE_UI = Boolean.parseBoolean(val);
                     break;
 
                 default:
@@ -421,7 +425,6 @@ public class MainThread {
         mainThread.printConf();
 
         mainThread.init();
-
 
         mainThread.timePerJobCalc();
         System.out.println("TIME PER JOB ON MACHINE ID #" + MainThread.machineId + " IS (in ms) :" + MainThread.timePerJob);

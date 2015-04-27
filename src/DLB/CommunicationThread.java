@@ -29,15 +29,14 @@ public class CommunicationThread extends Thread {
     }
 
     public void setUpStreams() throws IOException {
-        gzout = new GZIPOutputStream(MainThread.mySocket[socketNum].getOutputStream());
+        gzout = new GZIPOutputStream(MainThread.mySocket[socketNum].getOutputStream(), true);
         gzin = new GZIPInputStream(MainThread.mySocket[socketNum].getInputStream());
 
         dout = new ObjectOutputStream(MainThread.mySocket[socketNum].getOutputStream());
         din  = new ObjectInputStream(MainThread.mySocket[socketNum].getInputStream());
-
+//
 //        din = new ObjectInputStream(gzin);
 //        dout = new ObjectOutputStream(gzout);
-
     }
 
     public synchronized void sendMessage(Object message) throws IOException {
@@ -45,10 +44,11 @@ public class CommunicationThread extends Thread {
         //dout.writeUTF(message);
         //dout = new ObjectOutputStream(gzout);
         dout.reset();
-//        gzout = new GZIPOutputStream(MainThread.mySocket[socketNum].getOutputStream());
-//        dout = new ObjectOutputStream(gzout);
         dout.writeObject(message);
         dout.flush();
+//        gzout.flush();
+
+
 //        gzout.finish();
 //        dout.close();
     }
@@ -63,7 +63,7 @@ public class CommunicationThread extends Thread {
             incomingMsg = din.readObject();
 //            din.close();
 //            gzin.close();
-        }catch (ArrayStoreException ase) {
+        } catch (ArrayStoreException ase) {
             return null;
         }
         String inString = incomingMsg.toString();
@@ -200,6 +200,7 @@ public class CommunicationThread extends Thread {
             }
         }
         try {
+            gzout.finish();
             dout.close();
             din.close();
         } catch (IOException e) {
